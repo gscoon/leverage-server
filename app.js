@@ -5,6 +5,7 @@ var io = require('socket.io')(server);
 
 var plaid = require('plaid');
 var request = require('request');
+
 var pURL = 'https://tartan.plaid.com/'
 var plaid_env = plaid.environments.tartan;
 
