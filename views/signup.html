@@ -1,0 +1,29 @@
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Leverage 2</title>
+
+
+        <!--[if lt IE 9]>
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+    </head>
+
+    <body>
+        <!-- A hidden input named public_token will be appended to this form
+        once the user has completed the Link flow. Link will then submit the
+        form, sending the public_token to your server. -->
+        <form id="some-id" method="GET" action="?"></form>
+
+        <script
+          src="https://cdn.plaid.com/link/stable/link-initialize.js"
+          data-client-name="Leverage 2"
+          data-form-id="some-id"
+          data-key="62a717c4399ba5436ca9acc97069ba"
+          data-product="auth"
+          data-env="tartan">
+        </script>
+    </body>
+</html>
