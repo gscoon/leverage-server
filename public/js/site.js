@@ -1,5 +1,5 @@
 var site = {
-    processURL: window.location.origin + '/process',
+    plaidProcessURL: window.location.origin + '/plaid_process',
 
     onload: function(){
         this.setPlaidMenu();
@@ -47,7 +47,7 @@ var site = {
 
     sendPost: function(which, data, callback){
         $.ajax({
-            url: this.processURL + '?which=' + which,
+            url: this.plaidProcessURL + '?which=' + which,
             type:'POST',
             data: data
         }).done(callback);

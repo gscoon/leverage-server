@@ -1,5 +1,11 @@
 {
-    "clientID": "",
-    "secret": "",
-    "publicKey": ""
+    "plaid": {
+        "clientID": "",
+        "secret": "",
+        "publicKey": ""
+    },
+    "google": {
+        "clientID": "",
+        "clientSecret": ""
+    }
 }

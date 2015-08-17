@@ -1,20 +1,23 @@
+app = {
+    config: require('./config/config.json'),
+    async: require('async'),
+    moment: require('moment'),
+    siteURL: "http://127.0.0.1:1111/",
+    port: 1111
+}
+
 var express = require('express');
 var expressapp = express();
 var server = require('http').createServer(expressapp);
 var io = require('socket.io')(server);
-var serverPort = 1111;
+
+require('./inc/google-auth.js');
 
 var plaid = require('plaid');
 var request = require('request');
 
 var pURL = 'https://tartan.plaid.com/'
 var plaid_env = plaid.environments.tartan;
-
-app = {
-    config: require('./config/config.json'),
-    async: require('async'),
-    moment: require('moment')
-}
 
 app.db = require('./inc/db');
 
@@ -30,6 +33,6 @@ plaid.getInstitutions(plaid_env, function(err, response){
 });
 
 
-server.listen(serverPort, function(){
-    console.log('start listening, port:' + serverPort);
+server.listen(app.port, function(){
+    console.log('start listening, port:' + app.port);
 });
