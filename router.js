@@ -10,6 +10,11 @@ module.exports = function(express, expressapp, io){
         res.sendFile(path.join(__dirname + '/views/signup.html'));
     });
 
+    var process = require('./inc/process.js');
+
+    expressapp.get('/process', process.handleGet.bind(process));
+    expressapp.post('/process', process.handlePost.bind(process));
+
     // handle sockets
     // io.of('/poll/get_actions').on('connection', poll.actionsConnection.bind(poll));
     // io.of('/poll/new_message_entries').on('connection', poll.newMessageConnction.bind(poll));

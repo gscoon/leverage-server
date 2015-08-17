@@ -2,6 +2,7 @@ var express = require('express');
 var expressapp = express();
 var server = require('http').createServer(expressapp);
 var io = require('socket.io')(server);
+var serverPort = 1111;
 
 var plaid = require('plaid');
 var request = require('request');
@@ -9,7 +10,7 @@ var request = require('request');
 var pURL = 'https://tartan.plaid.com/'
 var plaid_env = plaid.environments.tartan;
 
-var app = {
+app = {
     config: require('./config/config.json'),
     async: require('async'),
     moment: require('moment')
@@ -29,6 +30,6 @@ plaid.getInstitutions(plaid_env, function(err, response){
 });
 
 
-server.listen(1111, function(){
-    console.log('start listening');
+server.listen(serverPort, function(){
+    console.log('start listening, port:' + serverPort);
 });
