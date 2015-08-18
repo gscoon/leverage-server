@@ -11,9 +11,9 @@ app = {
     async: require('async'),
     moment: require('moment'),
     port: config.port,
-    siteURL: "http://127.0.0.1:" + config.port,
+    siteURL: "http://127.0.0.1:" + config.port + '/',
     connString: 'mongodb://' + config.db.host + ':' + config.db.port + '/' + config.db.name,
-    db: require('./inc/db'),
+    mongo: require('./inc/mongo'),
     plaid_env: plaid.environments.tartan
 }
 

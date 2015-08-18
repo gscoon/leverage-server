@@ -23,6 +23,7 @@ module.exports = function(express, expressapp, io){
             store: new MongoStore({ url: app.connString })
     }));
 
+
     expressapp.get('/', function(req, res, next){
         res.sendFile(path.join(__dirname + '/views/signup.html'));
     });
@@ -36,9 +37,11 @@ module.exports = function(express, expressapp, io){
     expressapp.get('/auth/callback', goog.authCallback.bind(goog));
 
     expressapp.get('/session_test', function(req, res, next){
-            res.send(req.session);
-            next();
+        res.send(req.session);
+        next();
     });
+
+    expressapp.get('/gmail', goog.getEmails.bind(goog));
 
     // handle sockets
     // io.of('/poll/get_actions').on('connection', poll.actionsConnection.bind(poll));
