@@ -3,7 +3,7 @@ var OAuth2 = google.auth.OAuth2;
 
 var googleAuthClass = function(){
 
-    var oauth2Client = new OAuth2(app.config.google.clientID, app.config.google.clientSecret, app.siteURL + "auth/callback");
+    var oauth2Client = new OAuth2(config.google.clientID, config.google.clientSecret, app.siteURL + "auth/callback");
 
     // generate a url that asks permissions for Google+ and Google Calendar scopes
     var scopes = [
@@ -24,6 +24,13 @@ var googleAuthClass = function(){
     }
 
     this.authCallback = function(req, res, next){
+        var code = req.query.code;
+        oauth2Client.getToken(code, function(err, tokens) {
+            // Now tokens contains an access_token and an optional refresh_token. Save them.
+            if(!err) {
+                oauth2Client.setCredentials(tokens);
+            }
+        });
         console.log(req.body);
 
         res.end('got em');
@@ -31,4 +38,4 @@ var googleAuthClass = function(){
 
 }
 
-app.auth = new googleAuthClass();
+module.exports = new googleAuthClass();

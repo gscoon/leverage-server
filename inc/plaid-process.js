@@ -3,8 +3,7 @@ var async = require('async');
 
 var processClass = function(){
 
-
-    var plaidClient = new plaid.Client(app.config.plaid.clientID, app.config.plaid.secret, plaid.environments.tartan);
+    var plaidClient = new plaid.Client(config.plaid.clientID, config.plaid.secret, plaid.environments.tartan);
 
     this.handleGet = function(req, res, next){
 
@@ -73,6 +72,12 @@ var processClass = function(){
             }
         ], function(err, results){
             console.log(err, results);
+        });
+    }
+
+    this.getCategory = function(category_id){
+        plaid.getCategory(category_id, app.plaid_env, function(err, response){
+            //console.log(response);
         });
     }
 
