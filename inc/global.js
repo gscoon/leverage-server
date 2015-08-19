@@ -10,9 +10,9 @@ if (!String.prototype.format) {
     };
 }
 
-Object.prototype.extend = function(obj) {
-    for (var i in obj) {
-        if (obj.hasOwnProperty(i))
-            this[i] = obj[i];
-    }
-};
+// Object.prototype.extend = function(obj) {
+//     for (var i in obj) {
+//         if (obj.hasOwnProperty(i))
+//             this[i] = obj[i];
+//     }
+// };

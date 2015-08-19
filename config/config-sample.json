@@ -1,4 +1,10 @@
 {
+    "db": {
+        "host": "127.0.0.1",
+        "port": 27017,
+        "name": "leveragedb",
+        "connStr": "mongodb://127.0.0.1:27017/leveragedb"
+    },
     "plaid": {
         "clientID": "",
         "secret": "",
@@ -7,5 +13,10 @@
     "google": {
         "clientID": "",
         "clientSecret": ""
-    }
+    },
+    "facebook": {
+        "appId": "",
+        "secret": ""
+    },
+    "port": 1111
 }
