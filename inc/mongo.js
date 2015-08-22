@@ -47,11 +47,15 @@ function mongoClass(){
     this.upsertAppUser = function(selector, updateObj, insertObj, callback){
         db.collection('user').findAndModify(
             selector,
-            null,
+            false,
             {$set: updateObj, $setOnInsert: insertObj},
             {new: true, upsert: true },
             callback
         );
+    }
+
+    this.searchForExtensionByID = function(id, callback){
+        db.collection('user').find({extID: id}).toArray(callback);
     }
 
 }

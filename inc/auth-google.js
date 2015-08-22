@@ -1,4 +1,7 @@
 module.exports = new function(){
+    
+    this.scope = 'https://mail.google.com/ https://www.googleapis.com/auth/userinfo.profile';
+
     this.setStrategy = function(passport){
         var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 

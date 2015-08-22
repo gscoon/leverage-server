@@ -16,11 +16,13 @@ app = {
     connString: 'mongodb://' + config.db.host + ':' + config.db.port + '/' + config.db.name,
     mongo: require('./inc/mongo'),
     plaid_env: plaid.environments.tartan,
-    mongoConnected: function(){}
+    mongoConnected: function(){},
+    io: require('./inc/socket_handle.js')// handle sockets
 }
 
-require('./router')(express, expressapp, io);
+require('./router')(express, expressapp);
 
 server.listen(app.port, function(){
+    app.io.start(io);
     console.log('Started listening on port: ' + app.port);
 });
