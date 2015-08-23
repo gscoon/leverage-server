@@ -1,3 +1,4 @@
+var async = require('async');
 var fbgraph = require('fbgraph');
 
 module.exports = new function(){
@@ -6,7 +7,7 @@ module.exports = new function(){
     //'publish_actions'
     this.stat = 'fb';
 
-    this.setStrategy = function(passport, api, sess){
+    this.setStrategy = function(passport, sess){
         var self = this;
 
         var FacebookStrategy = require('passport-facebook').Strategy;
@@ -23,7 +24,7 @@ module.exports = new function(){
                 callbackURL: "/auth/fb/callback?extID=" + extensionID
             },
             function(accessToken, refreshToken, profile, done){
-                api.handleToken(accessToken, refreshToken, profile, done, extensionID);
+                app.api.handleToken(accessToken, refreshToken, profile, done, extensionID);
             })
 
         );
@@ -45,9 +46,12 @@ module.exports = new function(){
         //passport.authenticate('facebook',{scope: pass.fb.scope})
     }
 
-    this.pullContent = function(){
-        var fbgraph = require('fbgraph');
-        graph.setAccessToken(access_token);
+    this.pullContent = function(u, callback){
+        var url = '/' + u.facebook.id + '/feed';
+        fbgraph.setAccessToken(u.tokens.facebook.accessToken);
+        fbgraph.get(url, function(err, results){
+            async.map
+        });
     }
 
 }

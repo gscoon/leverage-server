@@ -4,7 +4,6 @@ var cookieParser = require("cookie-parser");
 var expressSession  = require("express-session");
 var methodOverride = require("method-override");
 var passport = require('passport');
-var api = require('./inc/auth-passport.js');
 
 module.exports = function(express, expressapp){
 
@@ -31,8 +30,8 @@ module.exports = function(express, expressapp){
     expressapp.use('/auth+', function (q,r,n) {
         // wait for session to set strategies
         console.log('auth strat middleware');
-        api.goog.setStrategy(passport);
-        api.fb.setStrategy.apply(api.fb, [passport, api, q.session])
+        app.api.goog.setStrategy(passport);
+        app.api.fb.setStrategy.apply(app.api.fb, [passport, q.session])
         n();
     });
 
@@ -59,21 +58,20 @@ module.exports = function(express, expressapp){
 
 
 
-    expressapp.get('/auth/google', passport.authenticate('google', {scope: api.goog.scope}));
+    expressapp.get('/auth/google', passport.authenticate('google', {scope: app.api.goog.scope}));
     //['https://mail.google.com/, https://www.google.com/m8/feeds, https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile']
 
-    expressapp.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), api.goog.authFinish);
+    expressapp.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), app.api.goog.authFinish);
 
-    expressapp.get('/gmail', api.goog.getEmails.bind(api.goog));
+    expressapp.get('/gmail', app.api.goog.getEmails.bind(app.api.goog));
 
     expressapp.get('/session_test', function(req, res, next){
         res.send(req.session);
         next();
     });
 
-
-    expressapp.get('/auth/pre-fb', api.fb.setExtension.bind(api.fb));
-    expressapp.get('/auth/fb', passport.authenticate('facebook',{scope: api.fb.scope}));
-    expressapp.get('/auth/fb/callback', passport.authenticate('facebook'), api.fb.authFinalCallback);
+    expressapp.get('/auth/pre-fb', app.api.fb.setExtension.bind(app.api.fb));
+    expressapp.get('/auth/fb', passport.authenticate('facebook',{scope: app.api.fb.scope}));
+    expressapp.get('/auth/fb/callback', passport.authenticate('facebook'), app.api.fb.authFinalCallback);
 
 }

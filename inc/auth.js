@@ -11,18 +11,21 @@ var passportClass = function(){
         var user = null;
         var selectorObj = {};
         selectorObj[profile.provider + '.id'] = profile.id;
-        console.log('selector: ', selectorObj);
-        var updateObj = {tokens: {accessToken: accessToken, refreshToken: refreshToken}, extID: extID};
+
+        var updateObj = {};
+        updateObj['tokens.' + profile.provider] = {accessToken: accessToken, refreshToken: refreshToken};
+        updateObj.extID = extID;
+
         var u = {name:''};
         u[profile.provider] = profile;
 
         // send socket update
-        app.io.sendAuthUpdate(extID, profile);
+
         app.mongo.upsertAppUser(selectorObj, updateObj, u, function(err, results){
             if(results != null) user = results.value;
-
+            app.io.sendAuthUpdate(extID, user);
             done(err, user);
-            console.log(err, results);
+            //console.log(err, results);
         });
 
     }

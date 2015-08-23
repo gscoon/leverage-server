@@ -17,7 +17,8 @@ app = {
     mongo: require('./inc/mongo'),
     plaid_env: plaid.environments.tartan,
     mongoConnected: function(){},
-    io: require('./inc/socket_handle.js')// handle sockets
+    io: require('./inc/socket_handle.js'), // handle sockets,
+    api: require('./inc/auth.js')
 }
 
 require('./router')(express, expressapp);
