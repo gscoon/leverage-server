@@ -17,7 +17,7 @@ module.exports = new function(){
                 sockets[extID] = socket;
 
                 app.mongo.searchForExtensionByID(extID, function(err, results){
-                    console.log('searchForExtensionByID', err, results);
+                    console.log('searchForExtensionByID');
                     socket.emit('user', results);
                 });
 
