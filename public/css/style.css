@@ -12,8 +12,8 @@ body
     width:20px;
     cursor:pointer;
     position:absolute;
-    top:20px;
-    right:20px;
+    top:10px;
+    right:10px;
 }
 
 a.disabled {
@@ -24,7 +24,6 @@ a.disabled {
 
 #lev_menu
 {
-    width:500px;
     background-color:#efefef;
     position:absolute;
     top:100px;
@@ -34,12 +33,11 @@ a.disabled {
     -moz-box-shadow: 0px 0px 31px -3px rgba(0,0,0,0.75);
     box-shadow: 0px 0px 31px -3px rgba(0,0,0,0.75);
     font-family: 'Open Sans';
-    padding:15px;
+    padding:10px;
 }
 
 #lev_menu_inner
 {
-    width:720px;
     margin:0 auto;
 }
 
@@ -61,51 +59,63 @@ a.disabled {
     width:240px;
 }
 
-#lev_menu_inner .save_button_row
+#lev_menu .save_button_row
 {
-    padding:10px 0 0;
+    padding:6px 0 0;
 }
 
-#lev_menu_inner .save_button_row a
+#lev_menu .save_button_row a
 {
-    height:25px;
+    height:24px;
     padding:5px 0 0;
-    width: 150px;
+    width: 110px;
     border:#44063b solid 1px;
     color:#fff;
     display:block;
-    float:left;
+    float:right;
     text-align:center;
-    margin:0 15px 0 0;
-    font-size:14px;
+    font-size:13px;
     cursor:pointer;
+    position:relative;
 }
 
-#lev_menu_inner .save_button_row a#save_button_purple
+#lev_menu .save_button_row a#save_button_purple
 {
     background-image:url('../images/pbutton.png');
+    margin:0 10px 0 0;
+    padding-right:15px;
+    width: 90px;
 }
 
 
-#lev_menu_inner .save_button_row a#save_button_blue
+#lev_menu .save_button_row a#save_button_blue
 {
     background-image:url('../images/bbutton.png');
 }
 
-#lev_menu_inner .save_button_row a#save_button_grey
+#lev_menu .save_button_row a#save_button_grey
 {
     background-image:url('../images/gbutton.png');
-    color:#222;
+    color:#111;
     border-color:#999;
+    padding-right:15px;
+    width: 95px;
+}
+
+#lev_menu .save_button_row a#save_button_grey:hover
+{
+    border-color:#777;
 }
 
 textarea#lev_comment_box
 {
     width:420px;
-    height:80px;
+    height:20px;
     font-size: 14px;
     font-family: 'Open Sans';
-    border-color:#ccc;
+    border-color:#aaa;
+    margin:0;
+    padding:3px;
 }
 
 .lev_menu_description
@@ -114,6 +124,26 @@ textarea#lev_comment_box
     font-size:15px;
     color:#666;
     position:relative;
+}
+
+#lock_icon
+{
+    background-image:url('../images/lock_icon.png');
+    width:10px;
+    height:13px;
+    position:absolute;
+    right:10px;
+    top:7px;
+}
+
+#next_arrow
+{
+    background-image:url('../images/next_arrow.png');
+    width:7px;
+    height:10px;
+    position:absolute;
+    right:10px;
+    top:10px;
 }
 
 #selection_arrow_down
@@ -125,6 +155,62 @@ textarea#lev_comment_box
     top:7px;
     display:block;
     position:absolute;
+}
+
+#selection_toggle_arrows
+{
+    background-image:url('../images/toggle_arrows.png');
+    width:9px;
+    height:12px;
+    top:4px;
+    right:0;
+    display:block;
+    position:absolute;
+}
+
+#lev_menu .custom_select
+{
+    padding:0 0 5px;
+    position:relative;
+}
+
+#lev_menu .custom_select .active_item
+{
+    position:relative;
+    min-height:15px;
+    font-size:13px;
+    display:inline-block;
+    vertical-align: top;
+    cursor:pointer;
+    padding:0 20px 0 0;
+    color:#333;
+}
+
+#lev_menu .custom_select .custom_select_list
+{
+    position:absolute;
+    left:0;
+    top:20px;
+    background-color:#222;
+    padding:5px 0;
+    display:none;
+}
+
+#lev_menu .custom_select .custom_select_list a.custom_select_item
+{
+    display:block;
+    text-decoration:none;
+    font-size:14px;
+    padding:5px 8px;
+    border:#333 dotted;
+    border-width:0 0 1px;
+    color:#efefef;
+    cursor:default;
+}
+
+#lev_menu .custom_select .custom_select_list a.custom_select_item:hover
+{
+    background-color:#333;
 }
 
 #clear

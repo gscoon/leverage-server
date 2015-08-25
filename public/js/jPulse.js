@@ -8,7 +8,8 @@
 			interval: 400,
 			left: 0,
 			top: 0,
-			zIndex: -1
+			zIndex: -1,
+			class: null
 		};
 
 	// The actual plugin constructor
@@ -49,11 +50,13 @@
 		var cLeft = this.options.left;
 		var cTop = this.options.top;
 		var zIndex = this.options.zIndex;
+		var cClass = this.options.class;
 
 		var cVisible = "visible";
 		var $element = this.element;
 
 		this.intervalPulsate = setInterval(function () {
+
 			var elePosition = $element.position();
 			var eleHeight = $element.height();
 			var eleWidth = $element.width();
@@ -67,6 +70,9 @@
 
 			var circleDOM = $( "<div style='" + circleCSS + "'></div>" );
 			$element.parent().append( circleDOM );
+
+			if(cClass != null)
+				circleDOM.attr('class', cClass);
 
 			if ( zIndex > 0 ) {
 				//Our pulsating div is on top

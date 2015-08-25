@@ -3,11 +3,24 @@ extends lev-layout
 block content
     div#lev_menu
         div#lev_menu_inner
-            div#lev_menu_inner_left
-                div.lev_menu_description Custom message:
-                    span#selection_arrow_down
-                textarea#lev_comment_box
+            div.custom_select
+                div.active_item Custom message:
+                    span#selection_toggle_arrows
+                div.custom_select_list
+                    a.custom_select_item Custom message:
+                    a.custom_select_item What do you think about this?
+                    a.custom_select_item Look into this.
+                    a.custom_select_item How cool is this?
+                    a.custom_select_item This is what I was talking about.
+                    a.custom_select_item What's going on here?
+                    a.custom_select_item This is great.
+                    a.custom_select_item This is terrible.
+            textarea#lev_comment_box
+
             div.save_button_row
-                a#save_button_purple() Share
-                a#save_button_grey() Keep it Private
+                a#save_button_grey() Private Tag
+                    span#lock_icon
+                a#save_button_purple() Share Tag
+                    span#next_arrow
                 div#clear
+        a#x

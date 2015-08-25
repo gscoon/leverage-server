@@ -72,18 +72,25 @@ var lev = new function(){
     }
 
     function setAnnotate(){
-        var target = null;
+        var pulse = null;
 
         $(window).on('click', function(e){
             if(!ctrKeyPressed)
                 return;
 
-            if(target != null)
-                target.jPulse( "disable" );
+            if(pulse != null){
+                console.log('pulse length',$('.' + pulse.class).length);
+                $('.' + pulse.class).hide().css('visible','hidden');
+                pulse.target.jPulse( "disable" );
+            }
 
-            target = $(e.target);
 
-            var dims = returnDimensions(target);
+            pulse = {
+                target: $(e.target),
+                class: randomStr(5)
+            }
+
+            var dims = returnDimensions(pulse.target);
             var rel = {x: (e.pageX - dims.ol), y:(e.pageY - dims.ot)}
 
             var spacingLeft = (dims.ol - dims.opl);
@@ -91,15 +98,17 @@ var lev = new function(){
 
             var options = {
                 interval: 400,
+                size:100,
                 zIndex: 999999999,
                 left: -1 * (dims.w/2) + spacingLeft + rel.x,
-                top: -1 * (dims.h/2) + rel.y
+                top: -1 * (dims.h/2) + rel.y,
+                class: pulse.class
             };
 
-            if(target.prop("tagName")  == 'HTML')
-                target = $('body');
+            if(pulse.target.prop("tagName")  == 'HTML')
+                pulse.target = $('body');
 
-            target.jPulse(options);
+            pulse.target.jPulse(options);
             showLevMenu(e.pageX, e.pageY, function(){
                 setTimeout(function(){
                         //captureElement(target);
@@ -111,7 +120,14 @@ var lev = new function(){
         });
     }
 
+	function randomStr(len){
+	    var text = "";
+	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	    for( var i=0; i < len; i++ )
+	        text += possible.charAt(Math.floor(Math.random() * possible.length));
 
+	    return text;
+	}
 
     function returnDimensions(c){
         var op = c.parent().offset();
@@ -134,9 +150,17 @@ var lev = new function(){
              $('body').append('<div id="lev_menu"></div><div id="general_overlay"></div>');
 
          var menu = $('#lev_menu');
+         var ai = menu.find('.custom_select .active_item');
+         ai.unbind();
+         ai.on('click', function(e){
+             $(this).parent().find('.custom_select_list').fadeToggle(300);
+         });
+
          var slope = 1 - menu.width() / $(window).width();
-         console.log('left', slope * w);
-         menu.css({'top': h + 10, 'left': slope * w}).show();
+
+         menu.hide().css({'top': h + 60, 'left': slope * w}).fadeIn(300, function(){
+             $('#lev_comment_box').val('What do you think...').select().focus();
+         });
 
          //$('#general_overlay').show();
 
