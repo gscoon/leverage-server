@@ -9,6 +9,7 @@ module.exports = function(express, expressapp){
 
 
     expressapp.set('port', app.port);
+    expressapp.set('view engine', 'jade');
 
     expressapp.use(express.static('public'));
     expressapp.use(cookieParser());
@@ -73,5 +74,9 @@ module.exports = function(express, expressapp){
     expressapp.get('/auth/pre-fb', app.api.fb.setExtension.bind(app.api.fb));
     expressapp.get('/auth/fb', passport.authenticate('facebook',{scope: app.api.fb.scope}));
     expressapp.get('/auth/fb/callback', passport.authenticate('facebook'), app.api.fb.authFinalCallback);
+
+    expressapp.get('/menu', function(req, res, next){
+        res.render('menu', { title: 'Dat menu'});
+    });
 
 }
