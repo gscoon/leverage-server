@@ -7,9 +7,22 @@ window.onload = function(){
 var lev = new function(){
 
     var ctrKeyPressed = false;
+    var z = {
+        pulse: 999999999,
+        menu: 99999999999997,
+        menuX: 99999999999999,
+        select: 99999999999998
+    };
+
+    var menu = null;
+    var pulse = null;
 
     this.start = function(){
         console.log('content script started');
+        if ($('#tag_menu').length == 0)
+            $('body').append('<div id="tag_menu"></div>');
+        menu = $('#tag_menu');
+
         setPageHandlers();
         setEventHandlers();
         setAnnotate();
@@ -66,24 +79,17 @@ var lev = new function(){
            console.log($(this).attr('src'));
         })
 
-        $('#x').on('click', function(){
-            $('#lev_menu').fadeOut(300);
-        });
+        $('#x').css('zIndex', z.menuX).on('click', closePulse);
     }
 
     function setAnnotate(){
-        var pulse = null;
 
         $(window).on('click', function(e){
             if(!ctrKeyPressed)
                 return;
 
-            if(pulse != null){
-                console.log('pulse length',$('.' + pulse.class).length);
-                $('.' + pulse.class).hide().css('visible','hidden');
-                pulse.target.jPulse( "disable" );
-            }
-
+            if(pulse != null)
+                closePulse();
 
             pulse = {
                 target: $(e.target),
@@ -97,9 +103,9 @@ var lev = new function(){
             var spacingTop = (dims.ot - dims.opt);
 
             var options = {
-                interval: 400,
-                size:100,
-                zIndex: 999999999,
+                interval: 300,
+                size:80,
+                zIndex: z.pulse,
                 left: -1 * (dims.w/2) + spacingLeft + rel.x,
                 top: -1 * (dims.h/2) + rel.y,
                 class: pulse.class
@@ -118,6 +124,12 @@ var lev = new function(){
             //captureElement(target);
             //  {color: "#993175", size: 120, speed: 2000, interval: 400, left: 0,  top: 0,  zIndex: -1 }
         });
+    }
+
+    function closePulse(){
+        $('.' + pulse.class).hide().css('visible','hidden');
+        pulse.target.jPulse( "disable" );
+        menu.fadeOut(300);
     }
 
 	function randomStr(len){
@@ -145,31 +157,67 @@ var lev = new function(){
     }
 
     function showLevMenu(w, h, callback){
-         //console.log('lev menu', $('#lev_menu').length);
-         if ($('#lev_menu').length == 0)
-             $('body').append('<div id="lev_menu"></div><div id="general_overlay"></div>');
+        // handle custom select
+        var customSelect = menu.find('.custom_select');
+        customSelect.css('zIndex', z.select);
 
-         var menu = $('#lev_menu');
-         var ai = menu.find('.custom_select .active_item');
-         ai.unbind();
-         ai.on('click', function(e){
-             $(this).parent().find('.custom_select_list').fadeToggle(300);
-         });
+        customSelect.find('.active_item').unbind().on('click', function(e){
+            $(this).parent().find('.custom_select_list').fadeToggle(300);
+        });
 
-         var slope = 1 - menu.width() / $(window).width();
+        $('#tag_share_button').unbind().on('click', function(){
+            $('#tag_menu_who').show();
+            $('#tag_menu_content').hide();
+        });
 
-         menu.hide().css({'top': h + 60, 'left': slope * w}).fadeIn(300, function(){
-             $('#lev_comment_box').val('What do you think...').select().focus();
-         });
+        customSelect.find('.custom_select_list').hide();
+        customSelect.find('.custom_select_list .custom_select_item').on('click',
+            function(e){
+                handleCustomSelect($(this));
+            }
+        );
 
-         //$('#general_overlay').show();
+        // figure out where place menu
+        var slope = 1 - menu.width() / $(window).width();
 
-         $('html, body').animate({
+        menu.hide().css({'top': h + 85, 'left': slope * w, 'zIndex': z.menu}).fadeIn(300, function(){});
+
+        $('#lev_comment_box').val('What do you think...')
+            .select()
+            .focus()
+            .on('click', function(){$(this).select()});
+
+        $('html, body').animate({
             scrollTop: h - 100
         }, 500, callback);
+    }
 
-        // $('#lev_menu').slideDown(300);
-     }
+    function handleCustomSelect(option){
+        var customSelect = option.parent().parent();
+        console.log();
+        var optionText = option.find('.custom_select_val').text();
+        if(optionText!=''){
+            var actionItemText = customSelect.find('.active_item_text');
+            var commentInput = $('#lev_comment_box');
+            var commentPreset = $('#lev_comment_preset');
+            var optionObj = JSON.parse(optionText);
+            if(optionObj.type == 'action'){
+                actionItemText.html('Custom Message:');
+                commentInput.show(200);
+                commentPreset.hide();
+                $('#lev_comment_box').select();
+            }
+            else if(optionObj.type == 'text'){
+                commentInput.hide();
+                commentPreset.hide().text(optionObj.val).show(200);
+                actionItemText.html('Preset Message:');
+            }
+            //lev_comment_preset
+        }
+
+        option.parent().hide();
+
+    }
 
     function captureElement(target){
         html2canvas(target[0], {

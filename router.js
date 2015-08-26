@@ -4,13 +4,14 @@ var cookieParser = require("cookie-parser");
 var expressSession  = require("express-session");
 var methodOverride = require("method-override");
 var passport = require('passport');
+var logger = require('morgan');
 
 module.exports = function(express, expressapp){
 
 
     expressapp.set('port', app.port);
     expressapp.set('view engine', 'jade');
-
+    expressapp.use(logger('dev'));
     expressapp.use(express.static('public'));
     expressapp.use(cookieParser());
     expressapp.use(bodyParser.urlencoded({ extended: false }));
