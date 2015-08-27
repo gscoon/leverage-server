@@ -12,8 +12,8 @@ body
     width:20px;
     cursor:pointer;
     position:absolute;
-    top:10px;
-    right:10px;
+    top:5px;
+    right:5px;
 }
 
 a.disabled {
@@ -33,25 +33,22 @@ a.disabled {
     -moz-box-shadow: 0px 0px 31px -4px rgba(0,0,0,0.75);
     box-shadow: 0px 0px 31px -4px rgba(0,0,0,0.75);
     font-family: 'Open Sans';
-    padding:10px;
+    padding:45px 15px 15px;
     display:none;
-    border:#999 solid 1px;
     font-size:14px;
+    border-radius: 3px;
 }
 
-
-.menu_label
+#tag_menu .tag_menu_title
 {
-    background-color:#e9d2e2;
-    padding:3px 10px;
-    color:#420d30;
+    background-color:#666;
+    color:#fff;
     font-size:13px;
+    padding:7px 10px;
     position:absolute;
-    top:-30px;
-    left:-1px;
-
-    border: #420d30 solid;
-    border-width:1px 1px 0;
+    top:0px;
+    left:15px;
+    border-radius: 0 0 3px 3px;
 }
 
 #tag_menu_tag
@@ -59,27 +56,9 @@ a.disabled {
     margin:0 auto;
 }
 
-#tag_menu_inner_left, #tag_menu_inner_right
-{
-    display:inline-block;
-    vertical-align:top;
-}
-
-#tag_menu_inner_left
-{
-    margin:0 10px 0 0;
-    width:460px;
-}
-
-#tag_menu_inner_right
-{
-    margin:0 10px 0 0;
-    width:240px;
-}
-
 #tag_menu .button_row
 {
-    padding:6px 0 0;
+    padding:15px 0 0;
 }
 
 #tag_menu .button_row a
@@ -89,12 +68,12 @@ a.disabled {
     width: 110px;
     border:#44063b solid 1px;
     color:#fff;
-    display:block;
-    float:left;
+    display:inline-block;
     text-align:center;
     font-size:13px;
     cursor:pointer;
     position:relative;
+    border-radius: 3px;
 }
 
 #tag_menu .button_row a#tag_share_button, #tag_menu .button_row a#tag_save_preview
@@ -115,13 +94,24 @@ a.disabled {
     background-image:url('../images/bbutton.png');
 }
 
-#tag_menu .button_row a#tag_private_button
+#tag_menu .button_row a.button_grey
 {
     background-image:url('../images/gbutton.png');
     color:#111;
     border-color:#999;
-    padding-right:15px;
     width: 95px;
+}
+
+#tag_menu .button_row #tag_private_button
+{
+    padding-right:15px;
+}
+
+#tag_menu .button_row a#tag_back_button
+{
+    width:50px;
+    margin:0 10px 0 0;
+    padding-left:15px;
 }
 
 #tag_menu .button_row a#tag_private_button:hover
@@ -131,18 +121,18 @@ a.disabled {
 
 textarea#lev_comment_box
 {
-    width:420px;
+    width:390px;
     height:20px;
     font-size: 14px;
     font-family: 'Open Sans';
     border-color:#aaa;
     margin:0;
-    padding:3px 5px;
+    padding:5px;
 }
 
 #lev_comment_preset
 {
-    display:block;
+    display:none;
     font-weight:bold;
     padding: 0 0 10px;
 }
@@ -151,8 +141,9 @@ textarea#lev_comment_box
 {
     padding:0 0 10px;
     font-size:14px;
-    color:#333;
+    color:#222;
     position:relative;
+    font-weight:bold;
 }
 
 #lock_icon
@@ -165,14 +156,24 @@ textarea#lev_comment_box
     top:7px;
 }
 
-#next_arrow
+.button_arrow
 {
-    background-image:url('../images/next_arrow.png');
     width:7px;
     height:10px;
     position:absolute;
     right:10px;
     top:10px;
+}
+
+#next_arrow
+{
+    background-image:url('../images/next_arrow.png');
+}
+
+#back_arrow
+{
+    background-image:url('../images/back_arrow.png');
+    left:10px;
 }
 
 #selection_arrow_down
@@ -257,42 +258,70 @@ textarea#lev_comment_box
 
 #tag_menu .custom_radio
 {
-
 }
 
 #tag_menu .custom_radio .custom_radio_option
 {
     display:inline-block;
-    padding:3px 10px;
+    padding:2px 20px;
     vertical-align: top;
+    border:#999 solid;
+    border-width:1px 1px 1px 0;
+    font-size:13px;
+    text-align: center;
+    color:#444;
+    background-color:#fff;
+}
 
+#tag_menu .custom_radio .custom_radio_option:first-child
+{
+    border-radius: 5px 0 0 5px;
+    border-left-width:1px;
+}
+
+#tag_menu .custom_radio .custom_radio_option:last-child
+{
+    border-radius: 0 5px 5px 0;
 }
 
 #tag_menu .custom_radio .custom_radio_option_active
 {
-    background-color:#7FA580;
-    color:#fff;
+    background-color:#ECDC91;
+    color:#383421;
 }
 
 #people_search_input
 {
-
+    font-size:14px;
+    width:385px;
+    padding:7px 5px;
 }
 
 .tag_specify_row
 {
-    padding:0 0 10px 15px;
+    padding:5px 0 10px 0px;
 }
 
-#tag_menu_who
+.tag_specify_row_label
 {
-    display:none;
-    width:600px;
+    color:#444;
+    padding:0 0 5px;
+    font-size:13px;
 }
 
-#tag_menu_preview
+#tag_menu_content, #tag_menu_who, #tag_menu_preview
 {
     display:none;
+    width:410px;
+}
+
+#tag_menu input, #tag_menu textarea
+{
+    line-height: normal;
+    font-weight:normal;
+    font-style: normal;
+    box-shadow:0;
+    box-sizing: content-box;
 }
 
 #clear

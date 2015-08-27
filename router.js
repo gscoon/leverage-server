@@ -6,8 +6,10 @@ var methodOverride = require("method-override");
 var passport = require('passport');
 var logger = require('morgan');
 
+
 module.exports = function(express, expressapp){
 
+    var process = require('./inc/process.js')(expressapp);
 
     expressapp.set('port', app.port);
     expressapp.set('view engine', 'jade');
@@ -58,8 +60,6 @@ module.exports = function(express, expressapp){
     expressapp.get('/plaid_process', plaidProcess.handleGet.bind(plaidProcess));
     expressapp.post('/plaid_process', plaidProcess.handlePost.bind(plaidProcess));
 
-
-
     expressapp.get('/auth/google', passport.authenticate('google', {scope: app.api.goog.scope}));
     //['https://mail.google.com/, https://www.google.com/m8/feeds, https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile']
 
@@ -76,8 +76,15 @@ module.exports = function(express, expressapp){
     expressapp.get('/auth/fb', passport.authenticate('facebook',{scope: app.api.fb.scope}));
     expressapp.get('/auth/fb/callback', passport.authenticate('facebook'), app.api.fb.authFinalCallback);
 
+    // testing testing 1 2 3
+    expressapp.get('/process', process.handleRequest);
+
     expressapp.get('/menu', function(req, res, next){
         res.render('menu', { title: 'Dat menu'});
+    });
+
+    expressapp.get('/dre', function(req, res, next){
+        res.render('dre', { title: 'Dre Day'});
     });
 
 }
