@@ -42,6 +42,7 @@ var lev = new function(){
             $.get(processURL + 'tag_menu', function(data){
                 $('body').append(data);
                 menu = $('#tag_menu');
+                $('#x').on('click', closePulse).css('zIndex', z.menuX);
             });
     }
 
@@ -88,7 +89,6 @@ var lev = new function(){
            console.log($(this).attr('src'));
         })
 
-        $('#x').css('zIndex', z.menuX).on('click', closePulse);
     }
 
     function setAnnotate(){
@@ -147,31 +147,45 @@ var lev = new function(){
     function createTestImage(){
         var txt = $.trim(pulse.target.text());
         var mainImgSrc = $('meta[property="og:image"]').attr('content');
+        var previewContainer = $('#tag_menu_preview_img');
         var imageObj = new Image();
         var canvas = document.createElement('CANVAS');
         imageObj.onload = function(){
-            canvas.width = this.width;
-            canvas.height = this.height;
+
+            var imageRatio = this.width/this.height;
+            var canvasDims = {w:previewContainer.innerWidth(), h:previewContainer.innerWidth() / imageRatio};
+
+            console.log(canvasDims);
+            console.log(this);
+            var fontSize = 12;
+
+            canvas.width =  canvasDims.w;
+            canvas.height = canvasDims.h;
 
             var context = canvas.getContext("2d");
                 context.save();
                 context.drawImage(this, 0, 0);
 
+
                 context.fillStyle = "rgba(0, 0, 0, 0.70)";
-                context.fillRect(0, 0, this.width, this.height);
+                context.fillRect(0, 0, canvasDims.w, canvasDims.h);
 
                 // restore to the default which was saved immediatlely
                 context.restore();
 
-                context.font = "40pt Calibri";
+                context.font = fontSize + "px Calibri";
                 context.shadowColor="black";
                 context.shadowBlur=7;
                 context.fillStyle  = "#ffffff";
                 // context.textBaseline="top";
                 context.textBaseline="hanging";
-                wrapText(context, txt, 0, 0, this.width, 50);
 
-            $('body').append(canvas);
+                wrapText(context, txt, 0, 0, canvasDims.width, fontSize * 1.25);
+
+            previewContainer.append(canvas);
+
+
+            //canvas.height = previewContainer.innerHeight();
         };
         imageObj.src = mainImgSrc;
 
@@ -201,6 +215,7 @@ var lev = new function(){
         $('.' + pulse.class).hide().css('visible','hidden');
         pulse.target.jPulse( "disable" );
         menu.fadeOut(300);
+        console.log('close attempt');
     }
 
 	function randomStr(len){
@@ -237,7 +252,7 @@ var lev = new function(){
         });
 
         $('#tag_share_button').unbind().on('click', showWhoMenu);
-        $('#tag_back_button').unbind().on('click', showContentMenu.bind(null, true));
+
 
         customSelect.find('.custom_select_list').hide();
         customSelect.find('.custom_select_list .custom_select_item').on('click',
@@ -260,6 +275,9 @@ var lev = new function(){
     }
 
     function showWhoMenu(){
+        $('#tag_back_button').unbind().on('click', showContentMenu.bind(null, true));
+        $('#tag_save_preview').unbind().on('click', showPreviewMenu);
+
         $('#tag_menu_who').fadeIn(300);
         $('#tag_menu_content').hide();
         $('#people_search_input')
@@ -273,6 +291,13 @@ var lev = new function(){
         $('#lev_comment_box')
             .attr('placeholder', 'Type what you\'re thinking...')
             .focus()
+    }
+
+    function showPreviewMenu(){
+        //tag_menu_preview
+        $('#tag_menu_who, #tag_menu_content').hide();
+        $('#tag_menu_preview').fadeIn(300);
+
     }
 
     function handleCustomSelect(option){
