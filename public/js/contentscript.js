@@ -6,7 +6,7 @@ window.onload = function(){
 
 var lev = new function(){
     var server = 'http://localhost:1111/';
-    var processURL = server + 'process?which='
+    var processURL = server + 'process?which=';
 
     var ctrKeyPressed = false;
     var z = {
@@ -16,12 +16,16 @@ var lev = new function(){
         select: 99999999999998
     };
 
-    var menu = null;
-    var pulse = null;
+    var pulse = {
+        menu: null,
+        target: null,
+        class: null,
+        comment: '',
+        url: null
+    };
 
     this.start = function(){
         console.log('content script started');
-
 
         setTagMenu();
         setPageHandlers();
@@ -37,13 +41,14 @@ var lev = new function(){
     }
 
     function setTagMenu(){
-        menu = $('#tag_menu');
-        if (menu.length == 0)
+        pulse.menu = $('#tag_menu');
+        if (pulse.menu.length == 0)
             $.get(processURL + 'tag_menu', function(data){
                 $('body').append(data);
-                menu = $('#tag_menu');
+                pulse.menu = $('#tag_menu');
                 $('#x').on('click', closePulse).css('zIndex', z.menuX);
             });
+        pulse.url = window.location.href;
     }
 
      //
@@ -87,7 +92,7 @@ var lev = new function(){
                console.log('converted: ', dataURL);
            });
            console.log($(this).attr('src'));
-        })
+       });
 
     }
 
@@ -97,13 +102,11 @@ var lev = new function(){
             if(!ctrKeyPressed)
                 return;
 
-            if(pulse != null)
+            if(pulse.target != null)
                 closePulse();
 
-            pulse = {
-                target: $(e.target),
-                class: randomStr(5)
-            }
+            pulse.target = $(e.target);
+            pulse.class = randomStr(5);
 
             var dims = returnDimensions(pulse.target);
             var rel = {x: (e.pageX - dims.ol), y:(e.pageY - dims.ot)}
@@ -130,60 +133,90 @@ var lev = new function(){
                     }, 2000);
             });
 
-            switch(pulse.target.prop("tagName")){
-                case 'P':
-                case 'SPAN':
-                case 'A':
-                    createTestImage();
-                    break;
-            }
-            console.log(pulse.target.prop("tagName"), $.trim(pulse.target.text()));
-
             //captureElement(target);
             //  {color: "#993175", size: 120, speed: 2000, interval: 400, left: 0,  top: 0,  zIndex: -1 }
         });
     }
 
-    function createTestImage(){
+    function createPulsePreview(){
+        console.log('createPulsePreview')
         var txt = $.trim(pulse.target.text());
         var mainImgSrc = $('meta[property="og:image"]').attr('content');
         var previewContainer = $('#tag_menu_preview_img');
         var imageObj = new Image();
         var canvas = document.createElement('CANVAS');
+
         imageObj.onload = function(){
 
             var imageRatio = this.width/this.height;
-            var canvasDims = {w:previewContainer.innerWidth(), h:previewContainer.innerWidth() / imageRatio};
 
-            console.log(canvasDims);
-            console.log(this);
-            var fontSize = 12;
+            if(this.width>this.height){
+                var squareLength = this.height;
+                var newPos = {l:(this.width - this.height)/2, t:0};
+            }
+            else{
+                var squareLength = this.width;
+                var newPos = {l:0, t:(this.height - this.width)/2};
+            }
 
-            canvas.width =  canvasDims.w;
-            canvas.height = canvasDims.h;
+            var menuWidth = parseInt(pulse.menu.css('width'));
 
+            var canvasDims = {w: squareLength * imageRatio, h: squareLength * (1/imageRatio)};
+
+            var fontSize = 18;
+            var iconLength = 100;
+
+            canvas.width =  iconLength;
+            canvas.height = iconLength;
+            $(canvas).attr('class', 'tag_snippit_img');
             var context = canvas.getContext("2d");
                 context.save();
-                context.drawImage(this, 0, 0);
+
+                // add image to context
+
+                // img
+                // x coordinate where to start clipping (optoinal)
+                // y coordinate where to start clippin (optional)
+                // Optional. The width of the clipped image
+                // Optional. The height of the clipped image
+                // The x coordinate where to place the image on the canvas
+                // The y coordinate where to place the image on the canvas
+                // Optional. The width of the sub-rectangle of the source image to draw into the destination context. If not specified, the entire rectangle from the coordinates specified by sx and sy to the bottom-right corner of the image is used.
+                // Optional. The height of the sub-rectangle of the source image to draw into the destination context.
+
+                context.drawImage(this, 0, 0, squareLength, squareLength, 0, 0, iconLength, iconLength);
 
 
-                context.fillStyle = "rgba(0, 0, 0, 0.70)";
-                context.fillRect(0, 0, canvasDims.w, canvasDims.h);
+                // // add dark overlay
+                // context.fillStyle = "rgba(0, 0, 0, 0.50)";
+                // context.fillRect(0, 0, canvasDims.w, canvasDims.h);
+                //
+                // // restore to the default which was saved immediatlely
+                // context.restore();
+                //
+                // // add text on top of image
+                // context.font = fontSize + "px Open Sans";
+                // context.shadowColor = "black";
+                // context.shadowBlur = 7;
+                // context.fillStyle = "#ffffff";
+                // context.textBaseline = "hanging";
 
-                // restore to the default which was saved immediatlely
-                context.restore();
+                // insert text and make it wrap
+                //wrapText(context, pulse.comment, canvasDims.w * .05, canvasDims.h * .1, canvasDims.w * .9, fontSize * 1.25);
 
-                context.font = fontSize + "px Calibri";
-                context.shadowColor="black";
-                context.shadowBlur=7;
-                context.fillStyle  = "#ffffff";
-                // context.textBaseline="top";
-                context.textBaseline="hanging";
+            // add canvas to document
+            previewContainer.append('<div class="tag_thoughts">' + pulse.comment + '</div>');
 
-                wrapText(context, txt, 0, 0, canvasDims.width, fontSize * 1.25);
 
-            previewContainer.append(canvas);
 
+            previewContainer.append('<div class="tag_snippit"><div class="tag_snippit_text">'+txt+'</div></div>');
+            $('.tag_snippit').append(canvas);
+            $('.tag_snippit').append('<a class="tag_snippit_link">' + pulse.url + '</a>');
+
+            //var canvasFooter = $('<div class="tag_menu_footer"><div class="tag_menu_footer_text">' + txt + '</div><div class="tag_menu_footer_a"><a href="">' + pulse.url + '</a></div></div>');
+            //previewContainer.append(canvasFooter);
+            canvasFooter.find('.tag_menu_footer_text').ellipsis();
+            canvasFooter.css('top', (canvasDims.h - 1) + 'px');
 
             //canvas.height = previewContainer.innerHeight();
         };
@@ -214,7 +247,7 @@ var lev = new function(){
     function closePulse(){
         $('.' + pulse.class).hide().css('visible','hidden');
         pulse.target.jPulse( "disable" );
-        menu.fadeOut(300);
+        pulse.menu.fadeOut(300);
         console.log('close attempt');
     }
 
@@ -244,7 +277,7 @@ var lev = new function(){
 
     function displayTagMenu(w, h, callback){
         // handle custom select
-        var customSelect = menu.find('.custom_select');
+        var customSelect = pulse.menu.find('.custom_select');
         customSelect.css('zIndex', z.select);
 
         customSelect.find('.active_item').unbind().on('click', function(e){
@@ -262,12 +295,12 @@ var lev = new function(){
         );
 
         // figure out where place menu
-        var slope = 1 - menu.width() / $(window).width();
+        var slope = 1 - pulse.menu.width() / $(window).width();
 
         $('#tag_menu_content').show();
-        $('#tag_menu_who').hide();
+        $('#tag_menu_who, #tag_menu_preview').hide();
 
-        menu.hide().css({'top': h + 40, 'left': slope * w, 'zIndex': z.menu}).fadeIn(300, showContentMenu);
+        pulse.menu.hide().css({'top': h + 40, 'left': slope * w, 'zIndex': z.menu}).fadeIn(300, showContentMenu);
 
         $('html, body').animate({
             scrollTop: h - 100
@@ -279,7 +312,7 @@ var lev = new function(){
         $('#tag_save_preview').unbind().on('click', showPreviewMenu);
 
         $('#tag_menu_who').fadeIn(300);
-        $('#tag_menu_content').hide();
+        $('#tag_menu_content, #tag_menu_preview').hide();
         $('#people_search_input')
             .attr('placeholder', 'Enter names or email addresses')
             .focus();
@@ -290,19 +323,36 @@ var lev = new function(){
         $('#tag_menu_content').fadeIn((fade)?300:0);
         $('#lev_comment_box')
             .attr('placeholder', 'Type what you\'re thinking...')
+            .on('change', function(){
+                pulse.comment = this.value;
+            })
             .focus()
+
     }
 
     function showPreviewMenu(){
         //tag_menu_preview
         $('#tag_menu_who, #tag_menu_content').hide();
         $('#tag_menu_preview').fadeIn(300);
+        $('#preview_back_button').unbind().on('click', showWhoMenu);
+
+        switch(pulse.target.prop("tagName")){
+            case 'P':
+            case 'SPAN':
+            case 'A':
+            case 'H1':
+            case 'H2':
+            case 'H3':
+            case 'H4':
+                createPulsePreview();
+                break;
+        }
 
     }
 
     function handleCustomSelect(option){
         var customSelect = option.parent().parent();
-        console.log();
+
         var optionText = option.find('.custom_select_val').text();
         if(optionText!=''){
             var actionItemText = customSelect.find('.active_item_text');
