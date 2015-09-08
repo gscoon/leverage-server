@@ -58,7 +58,20 @@ div#tag_menu
     // 3. Tag Preview
     div#tag_menu_preview
         div.tag_menu_title Preview Content
-        div#tag_menu_preview_img
+        div#tag_menu_preview_container
+            div.tag_item_top
+                img.tag_item_user_img
+                div.tag_item_user_name
+                div.tag_item_details
+                    span.tag_item_timestamp 15 minutes ago
+                    span.tag_item_comment_count 0 Comments
+                    span.tag_item_point_count 0 Points
+            div.tag_item_thoughts
+            div.tag_item_snippit
+                div.tag_item_snippit_text
+                canvas.tag_item_snippit_img
+                a.tag_item_snippit_link
+                
         div.button_row
             a#preview_back_button.button_grey() Back
                 span.back_arrow.button_arrow

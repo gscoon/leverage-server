@@ -7,7 +7,7 @@ function mongoClass(){
 
     var db = null;
 
-    MongoClient.connect(config.db.connStr, function(err, thisDB) {
+    MongoClient.connect(config.mongodb.connStr, function(err, thisDB) {
         console.log('db connected.');
         db = thisDB;
         app.mongoConnected();

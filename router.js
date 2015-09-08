@@ -16,7 +16,7 @@ module.exports = function(express, expressapp){
     expressapp.use(logger('dev'));
     expressapp.use(express.static('public'));
     expressapp.use(cookieParser());
-    expressapp.use(bodyParser.urlencoded({ extended: false }));
+    expressapp.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
 
     var MongoStore = require('connect-mongo')(expressSession );
 
@@ -24,7 +24,7 @@ module.exports = function(express, expressapp){
             secret: 'keyboard cat',
             resave: true,
             saveUninitialized: true,
-            store: new MongoStore({ url: app.connString })
+            store: new MongoStore({ url: config.mongodb.connStr })
     }));
 
     expressapp.use(passport.initialize());
@@ -77,7 +77,7 @@ module.exports = function(express, expressapp){
     expressapp.get('/auth/fb/callback', passport.authenticate('facebook'), app.api.fb.authFinalCallback);
 
     // testing testing 1 2 3
-    expressapp.get('/process', process.handleRequest);
+    expressapp.all('/process', process.handleRequest.bind(process));
 
     expressapp.get('/menu', function(req, res, next){
         res.render('menu', { title: 'Dat menu'});

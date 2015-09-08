@@ -20,8 +20,12 @@ var lev = new function(){
         menu: null,
         target: null,
         class: null,
+        pos: {},
         comment: '',
-        url: null
+        innerText: '',
+        url: window.location.href,
+        id: null,
+        genericImgSrc: null
     };
 
     this.start = function(){
@@ -30,14 +34,11 @@ var lev = new function(){
         setTagMenu();
         setPageHandlers();
         setEventHandlers();
-        setAnnotate();
+        setPulseClick();
 
-        // $(window).on('click', function(e){
-        //     var target = $(e.target);
-        //     chrome.runtime.sendMessage({action: "capture", target: target}, function(response) {
-        //         console.log('response', response);
-        //     });
-        // });
+        var generic = $('meta[property="og:image"]');
+        if(generic.length > 0)
+            pulse.genericImgSrc = generic.attr('content');
     }
 
     function setTagMenu(){
@@ -48,7 +49,6 @@ var lev = new function(){
                 pulse.menu = $('#tag_menu');
                 $('#x').on('click', closePulse).css('zIndex', z.menuX);
             });
-        pulse.url = window.location.href;
     }
 
      //
@@ -96,7 +96,8 @@ var lev = new function(){
 
     }
 
-    function setAnnotate(){
+    // create annotation / pulse
+    function setPulseClick(){
 
         $(window).on('click', function(e){
             if(!ctrKeyPressed)
@@ -107,9 +108,13 @@ var lev = new function(){
 
             pulse.target = $(e.target);
             pulse.class = randomStr(5);
+            pulse.id = randomStr(10);
+            pulse.innerText = $.trim(pulse.target.text());
 
             var dims = returnDimensions(pulse.target);
-            var rel = {x: (e.pageX - dims.ol), y:(e.pageY - dims.ot)}
+
+            pulse.pos.abs = {x: e.pageX, y: e.pageY}
+            pulse.pos.rel = {x: (e.pageX - dims.ol), y:(e.pageY - dims.ot)};
 
             var spacingLeft = (dims.ol - dims.opl);
             var spacingTop = (dims.ot - dims.opt);
@@ -118,8 +123,8 @@ var lev = new function(){
                 interval: 300,
                 size:80,
                 zIndex: z.pulse,
-                left: -1 * (dims.w/2) + spacingLeft + rel.x,
-                top: -1 * (dims.h/2) + rel.y,
+                left: -1 * (dims.w/2) + spacingLeft + pulse.pos.rel.x,
+                top: -1 * (dims.h/2) + pulse.pos.rel.y,
                 class: pulse.class
             };
 
@@ -138,141 +143,11 @@ var lev = new function(){
         });
     }
 
-    function createPulsePreview(){
-        console.log('createPulsePreview')
-        var txt = $.trim(pulse.target.text());
-        var mainImgSrc = $('meta[property="og:image"]').attr('content');
-        var previewContainer = $('#tag_menu_preview_img');
-        var imageObj = new Image();
-        var canvas = document.createElement('CANVAS');
-
-        imageObj.onload = function(){
-
-            var imageRatio = this.width/this.height;
-
-            if(this.width>this.height){
-                var squareLength = this.height;
-                var newPos = {l:(this.width - this.height)/2, t:0};
-            }
-            else{
-                var squareLength = this.width;
-                var newPos = {l:0, t:(this.height - this.width)/2};
-            }
-
-            var menuWidth = parseInt(pulse.menu.css('width'));
-
-            var canvasDims = {w: squareLength * imageRatio, h: squareLength * (1/imageRatio)};
-
-            var fontSize = 18;
-            var iconLength = 100;
-
-            canvas.width =  iconLength;
-            canvas.height = iconLength;
-            $(canvas).attr('class', 'tag_snippit_img');
-            var context = canvas.getContext("2d");
-                context.save();
-
-                // add image to context
-
-                // img
-                // x coordinate where to start clipping (optoinal)
-                // y coordinate where to start clippin (optional)
-                // Optional. The width of the clipped image
-                // Optional. The height of the clipped image
-                // The x coordinate where to place the image on the canvas
-                // The y coordinate where to place the image on the canvas
-                // Optional. The width of the sub-rectangle of the source image to draw into the destination context. If not specified, the entire rectangle from the coordinates specified by sx and sy to the bottom-right corner of the image is used.
-                // Optional. The height of the sub-rectangle of the source image to draw into the destination context.
-
-                context.drawImage(this, 0, 0, squareLength, squareLength, 0, 0, iconLength, iconLength);
-
-
-                // // add dark overlay
-                // context.fillStyle = "rgba(0, 0, 0, 0.50)";
-                // context.fillRect(0, 0, canvasDims.w, canvasDims.h);
-                //
-                // // restore to the default which was saved immediatlely
-                // context.restore();
-                //
-                // // add text on top of image
-                // context.font = fontSize + "px Open Sans";
-                // context.shadowColor = "black";
-                // context.shadowBlur = 7;
-                // context.fillStyle = "#ffffff";
-                // context.textBaseline = "hanging";
-
-                // insert text and make it wrap
-                //wrapText(context, pulse.comment, canvasDims.w * .05, canvasDims.h * .1, canvasDims.w * .9, fontSize * 1.25);
-
-            // add canvas to document
-            previewContainer.append('<div class="tag_thoughts">' + pulse.comment + '</div>');
-
-
-
-            previewContainer.append('<div class="tag_snippit"><div class="tag_snippit_text">'+txt+'</div></div>');
-            $('.tag_snippit').append(canvas);
-            $('.tag_snippit').append('<a class="tag_snippit_link">' + pulse.url + '</a>');
-
-            //var canvasFooter = $('<div class="tag_menu_footer"><div class="tag_menu_footer_text">' + txt + '</div><div class="tag_menu_footer_a"><a href="">' + pulse.url + '</a></div></div>');
-            //previewContainer.append(canvasFooter);
-            canvasFooter.find('.tag_menu_footer_text').ellipsis();
-            canvasFooter.css('top', (canvasDims.h - 1) + 'px');
-
-            //canvas.height = previewContainer.innerHeight();
-        };
-        imageObj.src = mainImgSrc;
-
-    }
-
-    function wrapText(context, text, x, y, maxWidth, lineHeight) {
-        var words = text.split(' ');
-        var line = '';
-
-        for(var n = 0; n < words.length; n++) {
-            var testLine = line + words[n] + ' ';
-            var metrics = context.measureText(testLine);
-            var testWidth = metrics.width;
-            if (testWidth > maxWidth && n > 0) {
-                context.fillText(line, x, y);
-                line = words[n] + ' ';
-                y += lineHeight;
-            }
-            else
-                line = testLine;
-
-        }
-        context.fillText(line, x, y);
-      }
-
     function closePulse(){
         $('.' + pulse.class).hide().css('visible','hidden');
         pulse.target.jPulse( "disable" );
         pulse.menu.fadeOut(300);
         console.log('close attempt');
-    }
-
-	function randomStr(len){
-	    var text = "";
-	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	    for( var i=0; i < len; i++ )
-	        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-	    return text;
-	}
-
-    function returnDimensions(c){
-        var op = c.parent().offset();
-        if(typeof op === 'undefined')
-            op = {left:0, top:0};
-
-        return {
-            w: c.innerWidth(),
-            h: c.innerHeight(),
-            ol: c.offset().left,
-            ot: c.offset().top,
-            opl: op.left,
-            opt: op.top
-        };
     }
 
     function displayTagMenu(w, h, callback){
@@ -327,7 +202,6 @@ var lev = new function(){
                 pulse.comment = this.value;
             })
             .focus()
-
     }
 
     function showPreviewMenu(){
@@ -335,7 +209,7 @@ var lev = new function(){
         $('#tag_menu_who, #tag_menu_content').hide();
         $('#tag_menu_preview').fadeIn(300);
         $('#preview_back_button').unbind().on('click', showWhoMenu);
-
+        saveTag();
         switch(pulse.target.prop("tagName")){
             case 'P':
             case 'SPAN':
@@ -347,7 +221,136 @@ var lev = new function(){
                 createPulsePreview();
                 break;
         }
+    }
 
+    function createPulsePreview(){
+        console.log('createPulsePreview');
+
+        var mainImgSrc = $('meta[property="og:image"]').attr('content');
+        var previewContainer = $('#tag_menu_preview_container');
+        var imageObj = new Image();
+        var canvas = previewContainer.find('.tag_item_snippit_img')[0];
+
+        imageObj.onload = function(){
+            var imageRatio = this.width/this.height;
+
+            if(this.width>this.height){
+                var squareLength = this.height;
+                var newPos = {l:(this.width - this.height)/2, t:0};
+            }
+            else{
+                var squareLength = this.width;
+                var newPos = {l:0, t:(this.height - this.width)/2};
+            }
+
+            var menuWidth = parseInt(pulse.menu.css('width'));
+
+            var canvasDims = {w: squareLength * imageRatio, h: squareLength * (1/imageRatio)};
+
+            var fontSize = 18;
+            var iconLength = 100;
+
+            canvas.width =  iconLength;
+            canvas.height = iconLength;
+
+            var context = canvas.getContext("2d");
+            context.save();
+
+            context.drawImage(this, 0, 0, squareLength, squareLength, 0, 0, iconLength, iconLength);
+        };
+
+        // add canvas to document
+        $('.tag_item_user_name').html('gscoon:');
+        $('.tag_item_user_img').attr('src', 'images/users/1.jpg');
+
+        $('.tag_item_thoughts').html(pulse.comment);
+        $('.tag_item_snippit_text').html(pulse.innerText).ellipsis();
+
+        $('.tag_item_snippit_link').html(pulse.url);
+
+        if(pulse.genericImgSrc != null)
+            imageObj.src = pulse.genericImgSrc;
+
+    }
+
+    function wrapText(context, text, x, y, maxWidth, lineHeight) {
+        var words = text.split(' ');
+        var line = '';
+
+        for(var n = 0; n < words.length; n++) {
+            var testLine = line + words[n] + ' ';
+            var metrics = context.measureText(testLine);
+            var testWidth = metrics.width;
+            if (testWidth > maxWidth && n > 0) {
+                context.fillText(line, x, y);
+                line = words[n] + ' ';
+                y += lineHeight;
+            }
+            else
+                line = testLine;
+
+        }
+        context.fillText(line, x, y);
+    }
+
+    function saveTag(){
+        var data = {
+            url: pulse.url,
+            fileID: pulse.id,
+            width: $(window).width(),
+            height: $(window).height(),
+            share: '',
+            pulseText: pulse.innerText,
+            thoughts: pulse.comment,
+            zoom: '',
+            pulsePos: JSON.stringify(pulse.pos)
+        };
+
+        $.post(processURL + 'save_tag', {data:JSON.stringify(data)}).done(function(res){
+            saveTagImages();
+            console.log(res);
+        });
+    }
+
+    function saveTagImages(){
+        // 1. save target
+        html2canvas(pulse.target, {
+            background: '#ffffff',
+            onrendered: function(canvas) {
+                saveTagImageProcess({
+                    str: canvas.toDataURL(),
+                    ext: 'png',
+                    type: 'target',
+                    fileID: pulse.id
+                });
+            }
+        });
+
+        // 2. save generic image
+        if(pulse.genericImgSrc != null){
+            var img = new Image();
+            img.setAttribute('crossOrigin', 'anonymous');
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            img.onload = function(){
+                canvas.width = this.width;
+                canvas.height = this.height;
+                ctx.drawImage(this, 0, 0);
+                saveTagImageProcess({
+                    str: canvas.toDataURL(),
+                    ext: 'png',
+                    type: 'generic',
+                    fileID: pulse.id
+                });
+            }
+            img.src = pulse.genericImgSrc
+        }
+
+    }
+
+    function saveTagImageProcess(saveObj){
+        $.post(processURL + 'save_image', {data: JSON.stringify(saveObj)});
     }
 
     function handleCustomSelect(option){
@@ -385,6 +388,21 @@ var lev = new function(){
         });
     }
 
+    function returnDimensions(c){
+        var op = c.parent().offset();
+        if(typeof op === 'undefined')
+            op = {left:0, top:0};
+
+        return {
+            w: c.innerWidth(),  // target inner width
+            h: c.innerHeight(), // target inner height
+            ol: c.offset().left, // target left relative to doocument
+            ot: c.offset().top, // target top relative to doocument
+            opl: op.left,
+            opt: op.top
+        };
+    }
+
     function convertImgToBase64URL(url, outputFormat, callback){
         var img = new Image();
         img.crossOrigin = 'Anonymous';
@@ -415,5 +433,15 @@ var lev = new function(){
                 a[key] = b[key];
         return a;
     }
+
+    function randomStr(len){
+	    var text = "";
+	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	    for( var i=0; i < len; i++ )
+	        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+	    return text;
+	}
+
 
 }

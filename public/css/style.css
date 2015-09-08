@@ -350,26 +350,6 @@ span.next_arrow
 }
 
 
-.tag_item_snippit
-{
-
-}
-
-.tag_item_snippit_text
-{
-    display:inline-block;
-    padding:5px 7px;
-    background-color:#ccc;
-    color:#000;
-    vertical-align: top;
-    font-size:13px;
-    margin:0 2px 0 0;
-    width:290px;
-    height:90px;
-    overflow:hidden;
-    border-radius: 5px 0 0 5px;
-}
-
 .tag_item_thoughts
 {
     padding:0 0 15px;
@@ -377,18 +357,81 @@ span.next_arrow
     font-weight:bold;
 }
 
+.tag_item_top
+{
+    position:relative;
+    padding:0px 0 0 40px;
+    margin:0 0 10px;
+    height:45px;
+    border:#ccc solid;
+    border-width:0 0 1px;
+}
+
+.tag_item_user_name
+{
+    color:#444;
+    font-size: 13px;
+    padding:0 0 2px;
+}
+
+.tag_item_user_img
+{
+    border-radius: 15px;
+    position:absolute;
+    left:0;
+    top:0;
+}
+
+.tag_item_details
+{
+    color:#999;
+    font-size: 12px;
+}
+
+.tag_item_details span
+{
+    padding-right:10px;
+}
+
 .tag_item_snippit_img
 {
     display:inline-block;
-    border-radius:0 5px 5px 0;
+    border-radius:10px;
 }
 
 .tag_item_snippit_link
 {
-    color:#205666;
-    padding:5px 0 0 5px;
+    color:#999;
+    padding:0;
     display:block;
-    font-size:13px;
+    font-size:12px;
+}
+
+.tag_item_snippit_link:hover
+{
+    color:#205666;
+}
+
+.tag_item_snippit
+{
+    border:#ccc solid;
+    border-width:0 0 1px;
+    padding:0 0 15px;
+}
+
+.tag_item_snippit_text
+{
+    display:inline-block;
+    /*background-color:#ccc;*/
+    color:#000;
+    vertical-align: top;
+    font-size:12px;
+    width:300px;
+    height:100px;
+    overflow:hidden;
+    font-family: monospace;
+    line-height:15px;
+    padding:0 10px 0 0;
 }
 
 #clear
