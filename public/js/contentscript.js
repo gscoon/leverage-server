@@ -25,7 +25,10 @@ var lev = new function(){
         innerText: '',
         url: window.location.href,
         id: null,
-        genericImgSrc: null
+        genericImgSrc: null,
+        meme: false,
+        isMemeSaved: false,
+        tagSaved: false
     };
 
     this.start = function(){
@@ -108,7 +111,6 @@ var lev = new function(){
 
             pulse.target = $(e.target);
             pulse.class = randomStr(5);
-            pulse.id = randomStr(10);
             pulse.innerText = $.trim(pulse.target.text());
 
             var dims = returnDimensions(pulse.target);
@@ -132,7 +134,11 @@ var lev = new function(){
                 pulse.target = $('body');
 
             pulse.target.jPulse(options);
-            displayTagMenu(e.pageX, e.pageY, function(){
+
+
+
+            showTagMenu(e.pageX, e.pageY, function(){
+                saveTag(); // save!!!!!!
                 setTimeout(function(){
                         //captureElement(target);
                     }, 2000);
@@ -143,6 +149,47 @@ var lev = new function(){
         });
     }
 
+
+    function saveTag(){
+        var saved = $('#tag_menu_notification_saved');
+        saved.hide();
+
+        pulse.tagSaved = false;
+        var data = {
+            url: pulse.url,
+            width: $(window).width(),
+            height: $(window).height(),
+            share: '',
+            pulseText: pulse.innerText,
+            thoughts: pulse.comment,
+            zoom: '',
+            pulsePos: JSON.stringify(pulse.pos)
+        };
+
+        $.post(processURL + 'save_tag', {data:JSON.stringify(data)}).done(function(res){
+            console.log('res', res);
+            if(res != ''){
+                if(res.success){
+                    pulse.tagSaved = true;
+                    pulse.id = res.id;
+                    setTimeout(function(){
+                        saved.fadeIn(300);
+                    }, 1000);
+                    setTimeout(function(){
+                        saved.fadeOut(300);
+                    }, 4000)
+
+                    saveTagImages();
+                }
+            }
+        });
+    }
+
+
+    function undoSaveTag(){
+
+    }
+
     function closePulse(){
         $('.' + pulse.class).hide().css('visible','hidden');
         pulse.target.jPulse( "disable" );
@@ -150,7 +197,8 @@ var lev = new function(){
         console.log('close attempt');
     }
 
-    function displayTagMenu(w, h, callback){
+    // SHOW TAG MENU
+    function showTagMenu(w, h, callback){
         // handle custom select
         var customSelect = pulse.menu.find('.custom_select');
         customSelect.css('zIndex', z.select);
@@ -159,15 +207,25 @@ var lev = new function(){
             $(this).parent().find('.custom_select_list').fadeToggle(300);
         });
 
-        $('#tag_share_button').unbind().on('click', showWhoMenu);
+        // $('#tag_share_button').unbind().on('click', showWhoMenu);
+        $('#tag_private_button').unbind().on('click', showPreviewMenu);
 
+        // navigation stuff
+        $('#tmn_add_message').unbind().on('click', showMessageMenu);
+        $('#tmn_share').unbind().on('click', showWhoMenu);
+        $('.tag_hide_button').unbind().on('click', closePulse);
 
         customSelect.find('.custom_select_list').hide();
-        customSelect.find('.custom_select_list .custom_select_item').on('click',
+        customSelect.find('.custom_select_list .custom_select_item').unbind().on('click',
             function(e){
                 handleCustomSelect($(this));
             }
         );
+
+        // save tag message
+        $('#tag_save_message_button').unbind().on('click', function(){
+            saveTagText();
+        })
 
         // figure out where place menu
         var slope = 1 - pulse.menu.width() / $(window).width();
@@ -175,33 +233,72 @@ var lev = new function(){
         $('#tag_menu_content').show();
         $('#tag_menu_who, #tag_menu_preview').hide();
 
-        pulse.menu.hide().css({'top': h + 40, 'left': slope * w, 'zIndex': z.menu}).fadeIn(300, showContentMenu);
+        pulse.menu.hide().css({'top': h + 40, 'left': slope * w, 'zIndex': z.menu}).fadeIn(300, showMessageMenu);
 
         $('html, body').animate({
             scrollTop: h - 100
         }, 500, callback);
     }
 
+    function showMessageMenu(fade){
+        console.log('showMessageMenu');
+        updateTagNav('tmn_add_message');
+        $('#tag_menu_who').hide();
+        $('#tag_menu_content').fadeIn((fade)?300:0);
+
+        $('#lev_comment_input')
+            .val('')
+            .attr('placeholder', 'Type what you\'re thinking...')
+            .unbind()
+            .on('input', function(){
+                pulse.comment = this.value;
+
+                // expand to text area
+                if(this.value.length > 40){
+                    $(this).hide();
+                    $('#lev_comment_textarea')
+                        .show()
+                        .val(this.value)
+                        .animate({'height':60}, 300)
+                        .focus();
+                }
+            })
+            .on('keyup', function(e){
+                if(e.keyCode == '13')
+                    saveTagText();
+            })
+            .focus()
+    }
+
+    function saveTagText(){
+        var data = {
+            thoughts: pulse.comment,
+            id: pulse.id
+        };
+        $('#tag_menu_content').hide();
+
+        $('#tag_menu_load_page, #tm_loader').show(); // show loader menu
+        $.post(processURL + 'save_tag_text', {data:JSON.stringify(data)}).done(function(res){
+            console.log('save message', res);
+            if(res.success)
+                setTimeout(function(){
+                    $('#tm_loader').hide();
+                    $('#tm_loader_message').html('Your message has been saved.');
+                    setTimeout(showWhoMenu, 2000)
+                }, 1000);
+        });
+    }
+
     function showWhoMenu(){
-        $('#tag_back_button').unbind().on('click', showContentMenu.bind(null, true));
+        updateTagNav('tmn_share');
+        $('#tag_back_button').unbind().on('click', showMessageMenu.bind(null, true));
         $('#tag_save_preview').unbind().on('click', showPreviewMenu);
 
         $('#tag_menu_who').fadeIn(300);
-        $('#tag_menu_content, #tag_menu_preview').hide();
+        $('#tag_menu_content, #tag_menu_preview, #tag_menu_load_page').hide();
         $('#people_search_input')
             .attr('placeholder', 'Enter names or email addresses')
             .focus();
-    }
-
-    function showContentMenu(fade){
-        $('#tag_menu_who').hide();
-        $('#tag_menu_content').fadeIn((fade)?300:0);
-        $('#lev_comment_box')
-            .attr('placeholder', 'Type what you\'re thinking...')
-            .on('change', function(){
-                pulse.comment = this.value;
-            })
-            .focus()
     }
 
     function showPreviewMenu(){
@@ -209,28 +306,58 @@ var lev = new function(){
         $('#tag_menu_who, #tag_menu_content').hide();
         $('#tag_menu_preview').fadeIn(300);
         $('#preview_back_button').unbind().on('click', showWhoMenu);
-        saveTag();
-        switch(pulse.target.prop("tagName")){
-            case 'P':
-            case 'SPAN':
-            case 'A':
-            case 'H1':
-            case 'H2':
-            case 'H3':
-            case 'H4':
+
+        pulse.meme = pulse.isMemeSaved = false;
+
+        pulse.tagType = pulse.target.prop("tagName").toLowerCase();
+
+        switch(pulse.tagType){
+            case 'p':
+            case 'span':
+            case 'a':
+            case 'h1':
+            case 'h2':
+            case 'h3':
+            case 'h4':
+            case 'img':
                 createPulsePreview();
                 break;
         }
     }
 
+    function updateTagNav(whichID){
+        var activeClass = 'tag_menu_title';
+        $('.' + activeClass).removeClass(activeClass);
+        $('#' + whichID).attr('class', activeClass);
+    }
+
     function createPulsePreview(){
         console.log('createPulsePreview');
 
-        var mainImgSrc = $('meta[property="og:image"]').attr('content');
+        // add canvas to document
+        $('.tag_item_user_name').html('gscoon:');
+        $('.tag_item_user_img').attr('src', 'images/users/1.jpg');
+
+        $('.tag_item_snippit_link').html(pulse.url);
+
+        saveTag();
+
+        if(pulse.tagType == 'img'){
+            createImageMeme(pulse.target.attr('src'));
+        }
+        else if(pulse.genericImgSrc != null){
+            $('.tag_item_thoughts').html(pulse.comment);
+            createImageIcon(pulse.genericImgSrc);
+            if(pulse.innerText != null && pulse.innerText != '')
+                $('.tag_item_snippit_text').html(pulse.innerText).ellipsis();
+        }
+
+    }
+
+    function createImageIcon(src){
         var previewContainer = $('#tag_menu_preview_container');
         var imageObj = new Image();
         var canvas = previewContainer.find('.tag_item_snippit_img')[0];
-
         imageObj.onload = function(){
             var imageRatio = this.width/this.height;
 
@@ -258,19 +385,57 @@ var lev = new function(){
 
             context.drawImage(this, 0, 0, squareLength, squareLength, 0, 0, iconLength, iconLength);
         };
+        imageObj.src = src;
+    }
 
-        // add canvas to document
-        $('.tag_item_user_name').html('gscoon:');
-        $('.tag_item_user_img').attr('src', 'images/users/1.jpg');
+    function createImageMeme(src){
+        console.log('createImageMeme');
+        var previewContainer = $('#tag_menu_preview_container');
+        var imageObj = new Image();
+        imageObj.setAttribute('crossOrigin', 'anonymous');
+        var canvas = previewContainer.find('.tag_item_snippit_img')[0];
 
-        $('.tag_item_thoughts').html(pulse.comment);
-        $('.tag_item_snippit_text').html(pulse.innerText).ellipsis();
+        imageObj.onload = function(){
 
-        $('.tag_item_snippit_link').html(pulse.url);
+            var imageRatio = this.width / this.height;
+            var canvasDims = {w:previewContainer.innerWidth(), h:previewContainer.innerWidth() / imageRatio};
+            console.log({canvasDims:canvasDims});
+            canvas.width =  canvasDims.w;
+            canvas.height = canvasDims.h;
 
-        if(pulse.genericImgSrc != null)
-            imageObj.src = pulse.genericImgSrc;
+            var context = canvas.getContext("2d");
+            context.save();
+            context.drawImage(this, 0, 0, this.width, this.height, 0, 0, canvasDims.w, canvasDims.h);
 
+            // transparent overlay
+            //context.fillStyle = "rgba(0, 0, 0, 0.70)";
+            //context.fillRect(0, 0, canvasDims.w, canvasDims.h);
+
+            // restore to the default which was saved immediatlely
+            context.restore();
+
+            var fontSize = 18;
+            context.font = fontSize + "px Open Sans";
+            context.shadowColor="black";
+            context.shadowBlur=7;
+            context.fillStyle  = "#ffffff";
+            // context.textBaseline="top";
+            context.textBaseline="hanging";
+
+            wrapText(context, pulse.comment, canvasDims.w * .05, canvasDims.h * .1, canvasDims.w * .9, fontSize * 1.25);
+
+            pulse.meme = canvas.toDataURL();
+
+            // gerren, this should make sure the tag is saved first saved...
+            saveTagImageProcess({
+                str: pulse.meme,
+                ext: 'png',
+                type: 'meme',
+                fileID: pulse.id
+            });
+        }
+
+        imageObj.src = src;
     }
 
     function wrapText(context, text, x, y, maxWidth, lineHeight) {
@@ -293,38 +458,25 @@ var lev = new function(){
         context.fillText(line, x, y);
     }
 
-    function saveTag(){
-        var data = {
-            url: pulse.url,
-            fileID: pulse.id,
-            width: $(window).width(),
-            height: $(window).height(),
-            share: '',
-            pulseText: pulse.innerText,
-            thoughts: pulse.comment,
-            zoom: '',
-            pulsePos: JSON.stringify(pulse.pos)
-        };
-
-        $.post(processURL + 'save_tag', {data:JSON.stringify(data)}).done(function(res){
-            saveTagImages();
-            console.log(res);
-        });
-    }
 
     function saveTagImages(){
+        console.log('saveTagImages');
         // 1. save target
-        html2canvas(pulse.target, {
-            background: '#ffffff',
-            onrendered: function(canvas) {
-                saveTagImageProcess({
-                    str: canvas.toDataURL(),
-                    ext: 'png',
-                    type: 'target',
-                    fileID: pulse.id
-                });
-            }
-        });
+        if(pulse.tagType != 'img'){
+            html2canvas(pulse.target, {
+                background: '#ffffff',
+                onrendered: function(canvas) {
+                    saveTagImageProcess({
+                        str: canvas.toDataURL(),
+                        ext: 'png',
+                        type: 'target',
+                        fileID: pulse.id
+                    });
+                }
+            });
+
+        }
+
 
         // 2. save generic image
         if(pulse.genericImgSrc != null){

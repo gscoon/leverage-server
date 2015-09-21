@@ -27,6 +27,8 @@ function processClass(expressApp){
             case 'save_image':
                 saveImage(httpObj);
                 break;
+            case 'save_tag_text':
+                saveTagText(httpObj);
         }
 
     }
@@ -36,12 +38,23 @@ function processClass(expressApp){
     }
 
     function saveTag(httpObj){
+        var id = returnRandID(15);
         if(typeof httpObj.req.body.data === 'undefined') return httpObj.res.end('Missing vars');
 
         var tagObj = JSON.parse(httpObj.req.body.data);
-        app.db.addTagEntry(tagObj, function(err, results){
+        app.db.addTagEntry(id, tagObj, function(err, results){
             console.log(err, results);
-            httpObj.res.send('got it');
+            httpObj.res.send({success:(err == null), id:id});
+        });
+    }
+
+    function saveTagText(httpObj){
+        if(typeof httpObj.req.body.data === 'undefined') return httpObj.res.end('Missing vars');
+
+        var tagObj = JSON.parse(httpObj.req.body.data);
+        app.db.saveTagText(tagObj, function(err, results){
+            console.log(err, results);
+            httpObj.res.send({success:(err == null)});
         });
     }
 
@@ -50,14 +63,15 @@ function processClass(expressApp){
 
         var imgObj = JSON.parse(httpObj.req.body.data);
 
-        if(imgObj.type != 'target' && imgObj.type != 'generic')
+        if(imgObj.type != 'target' && imgObj.type != 'generic' && imgObj.type != 'meme')
             return console.log('bad type');
 
         var savePath = path.resolve(__dirname,'../files/{0}/{1}.{2}'.format(imgObj.type, imgObj.fileID, imgObj.ext));
         var imageBuffer = decodeBase64Image(imgObj.str);
 
         fs.writeFile(savePath, imageBuffer.data, function(err) {
-            console.log('image_saved?', err);
+            console.log('image_saved', err, app.moment().format("YYYY-MM-DD HH:mm:ss"));
+            httpObj.res.send('image saved | ' + imgObj.type);
         });
     }
 
@@ -73,6 +87,15 @@ function processClass(expressApp){
         response.data = new Buffer(matches[2], 'base64');
 
         return response;
+    }
+
+    function returnRandID(len){
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        for( var i=0; i < len; i++ )
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
     }
 
 

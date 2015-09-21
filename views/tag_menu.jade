@@ -1,9 +1,15 @@
 div#tag_menu
-    
+    div#tag_menu_notification_saved
+        span Saved
+    div#tag_menu_nav
+        a#tmn_add_message.tag_menu_title Add a Message
+        a#tmn_share Who Can See It
+        a#tmn_more More details
+        //a#tmn_revisit Revisit
     // 1. Tag Content
     div#tag_menu_content
-        div.tag_menu_title Tag content
-        div.custom_select
+        
+        //div.custom_select
             div.active_item
                 span.active_item_text Custom message:
                 span.selection_toggle_arrows
@@ -26,34 +32,39 @@ div#tag_menu
                     span.custom_select_val {"type":"text", "val":"This is great."}
                 a.custom_select_item This is terrible.
                     span.custom_select_val {"type":"text", "val":"This is terrible."}
-        textarea#lev_comment_box
+        input#lev_comment_input(type="text")
+        textarea#lev_comment_textarea
         div#lev_comment_preset
         
         // buttons
         div.button_row
-            a#tag_share_button() Share Tag
+            //a#tag_share_button() Share Tag
                 span.next_arrow.button_arrow
-            a#tag_private_button.button_grey() Private Tag
-                span#lock_icon
+            
+            a#tag_save_message_button Save Message
+                span.plus_icon
+            //a.tag_hide_button Hide
             
     // 2. Who
     div#tag_menu_who
-        div.tag_menu_title Who can see your tag?
+        //div.tag_specify_row_label Who can see your tag?
         div.tag_specify_row
             div.custom_radio
                 a.custom_radio_option.custom_radio_option_active Specify
                 a.custom_radio_option Anyone with a link
         div.tag_specify_row
-            div.tag_specify_row_label People and Groups
+            // div.tag_specify_row_label People and Groups
             input#people_search_input
             //- div.tag_specify_row_label Recent
             //- div#tag_recent_container    
         // buttons
         div.button_row
-            a#tag_back_button.button_grey() Back
+            //a#tag_back_button.button_grey() Back
                 span.back_arrow.button_arrow
-            a#tag_save_preview() Save and Preview
-                span.next_arrow.button_arrow
+            a#tag_save_preview() Save People
+                span.plus_icon
+            a.button_grey Keep it Private
+                span.lock_icon
     
     // 3. Tag Preview
     div#tag_menu_preview
@@ -77,5 +88,9 @@ div#tag_menu
                 span.back_arrow.button_arrow
             a#tag_finish_button() Finish
                 span.button_check
+    
+    div#tag_menu_load_page
+        div#tm_loader
+        div#tm_loader_message
     // close button
     a#x.x

@@ -11,10 +11,16 @@ var dbClass = function(){
         dateStrings: 'DATE' // most annoying feature that I had to account for
     });
 
-    this.addTagEntry = function(t, callback){
+    this.addTagEntry = function(fileID, t, callback){
         var ts = app.moment().format("YYYY-MM-DD HH:mm:ss");
         var q = "INSERT INTO tag (url, file_id, window_width, window_height, share_status, pulse_text, thoughts, zoom, pulsePos, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        var params = [t.url, t.fileID, t.width, t.height, t.share, t.pulseText, t.thoughts, t.zoom, t.pulsePos, ts];
+        var params = [t.url, fileID, t.width, t.height, t.share, t.pulseText, t.thoughts, t.zoom, t.pulsePos, ts];
+        runQuery(q, params, callback);
+    }
+
+    this.saveTagText = function(t, callback){
+        var q = 'UPDATE tag SET pulse_text = ? WHERE file_id = ?';
+        var params = [t.thoughts, t.id];
         runQuery(q, params, callback);
     }
 
