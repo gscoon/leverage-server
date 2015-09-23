@@ -29,6 +29,10 @@ function processClass(expressApp){
                 break;
             case 'save_tag_text':
                 saveTagText(httpObj);
+                break;
+            case 'save_tag_chain':
+                res.send('work in progress');
+                break;
         }
 
     }

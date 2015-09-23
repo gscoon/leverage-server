@@ -1,14 +1,9 @@
 div#tag_menu
     div#pulse_pointer
-        div#pp_text
-        div#pp_chain
+        div#pp_icon.pp_text
     div#tag_menu_notification_saved
-        span Saved
-    //div#tag_menu_nav
-        a#tmn_add_message.tag_menu_title Message
-        //a#tmn_share Who Can See It
-        a#tmn_chain Chain
-        //a#tmn_revisit Revisit
+        span Tag saved!
+
     // 1. Tag Content
     div#tag_menu_content
         
@@ -40,14 +35,28 @@ div#tag_menu
         div#lev_comment_preset
         
         // buttons
-        div.button_row
+        // div.button_row
             //a#tag_share_button() Share Tag
                 span.next_arrow.button_arrow
             
             a#tag_save_message_button Save Message
                 span.plus_icon
             //a.tag_hide_button Hide
-            
+    // 2. Chain menu
+    div#tag_menu_chain
+        div#chain_selection_row
+            a#default_chain.active_chain My Pulse
+                input(type="hidden" value="1")
+            a WTF
+                input(type="hidden" value="2")
+            a This!
+                input(type="hidden" value="3")
+            a Hacking
+                input(type="hidden" value="4")
+            a Music
+                input(type="hidden" value="5")
+            a#more_chain.nothing ...
+                input(type="hidden" value="6")
     // 2. Who
     div#tag_menu_who
         //div.tag_specify_row_label Who can see your tag?

@@ -53,6 +53,7 @@ var lev = new function(){
                 $('body').append(data);
                 pulse.menu = $('#tag_menu');
                 $('#x').on('click', closePulse).css('zIndex', z.menuX);
+                $('#chain_selection_row a').on('click', saveTagChain);
             });
     }
 
@@ -68,8 +69,7 @@ var lev = new function(){
                 handleInstagram();
                 break;
          }
-
-     }
+    }
 
     function setEventHandlers(){
         $(window).on('keydown', function(e){
@@ -105,7 +105,6 @@ var lev = new function(){
     function setPulseClick(){
 
         $(window).on('click', function(e){
-            console.log('setPulseClick');
             if(!ctrKeyPressed)
                 return;
 
@@ -177,10 +176,10 @@ var lev = new function(){
                     pulse.tagSaved = true;
                     pulse.id = res.id;
                     setTimeout(function(){
-                        saved.fadeIn(300);
+                        //saved.show();
                     }, 1000);
                     setTimeout(function(){
-                        saved.fadeOut(300);
+                        //saved.fadeOut(300);
                     }, 4000)
 
                     saveTagImages();
@@ -205,6 +204,7 @@ var lev = new function(){
     function showTagMenu(w, h, callback){
         // handle custom select
         var customSelect = pulse.menu.find('.custom_select');
+        $('#pp_icon').attr('class', 'pp_text');
         customSelect.css('zIndex', z.select);
 
         customSelect.find('.active_item').unbind().on('click', function(e){
@@ -235,7 +235,7 @@ var lev = new function(){
         var slope = 1 - pulse.menu.width() / $(window).width();
 
         $('#tag_menu_content').show();
-        $('#tag_menu_who, #tag_menu_preview').hide();
+        $('#tag_menu_who, #tag_menu_preview, #tag_menu_chain').hide();
 
         pulse.menu.hide().css({'top': h + 40, 'left': slope * w, 'zIndex': z.menu}).fadeIn(300, showMessageMenu);
 
@@ -246,9 +246,11 @@ var lev = new function(){
 
     function showMessageMenu(fade){
         console.log('showMessageMenu');
-        updateTagNav('tmn_add_message');
+
+
         $('#tag_menu_who').hide();
-        $('#tag_menu_content').fadeIn((fade)?300:0);
+        $('#tag_menu_content').show();
+        $('#pp_icon').attr('class', 'pp_text');
 
         $('#lev_comment_input')
             .val('')
@@ -267,18 +269,18 @@ var lev = new function(){
                         .focus();
                 }
             })
+
+            .focus()
+
+        $('#lev_comment_textarea, #lev_comment_input')
             .on('keyup', function(e){
                 if(e.keyCode == '13')
                     saveTagText();
             })
-            .focus()
     }
 
     function saveTagText(){
-        var data = {
-            thoughts: pulse.comment,
-            id: pulse.id
-        };
+        var data = {thoughts: pulse.comment, id: pulse.id};
         $('#tag_menu_content').hide();
 
         $('#tag_menu_load_page, #tm_loader').show(); // show loader menu
@@ -287,10 +289,41 @@ var lev = new function(){
             if(res.success)
                 setTimeout(function(){
                     $('#tm_loader').hide();
-                    $('#tm_loader_message').html('Your message has been saved.');
-                    setTimeout(showWhoMenu, 2000)
+                    $('#tm_loader_message').html('Select a chain...');
+                    setTimeout(showChainMenu, 1500)
                 }, 1000);
         });
+    }
+
+    function showChainMenu(){
+        $('#tag_menu_chain').fadeIn(300);
+        $('#pp_icon').attr('class', 'pp_chain');
+        $('#tag_menu_content, #tag_menu_preview, #tag_menu_who, #tag_menu_load_page').hide();
+    }
+
+    function saveTagChain(tID){
+        console.log('saveTagChain');
+        if(typeof tID !== 'number'){
+            tID = $(this).find('input').val();
+        }
+
+        var data = {tagID: tID, id: pulse.id};
+        $('#tag_menu_chain').hide();
+        $('#tag_menu_load_page, #tm_loader').show(); // show loader menu
+        $('#tm_loader_message').html('');
+
+        $.post(processURL + 'save_tag_chain', {data:JSON.stringify(data)}).done(function(res){
+            $('#tm_loader').hide();
+            setTimeout(function(){
+                $('#tm_loader').hide();
+                $('#tm_loader_message').html('Tag saved.');
+                setTimeout(function(){
+                    pulse.menu.fadeOut(200);
+                }, 2000);
+            }, 1000);
+        });
+
+        console.log('tID', tID);
     }
 
     function showWhoMenu(){
