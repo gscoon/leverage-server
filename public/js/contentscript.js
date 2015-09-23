@@ -42,6 +42,8 @@ var lev = new function(){
         var generic = $('meta[property="og:image"]');
         if(generic.length > 0)
             pulse.genericImgSrc = generic.attr('content');
+
+        //console.log($('h1, h2, h3, h4, p').text());
     }
 
     function setTagMenu(){
@@ -103,6 +105,7 @@ var lev = new function(){
     function setPulseClick(){
 
         $(window).on('click', function(e){
+            console.log('setPulseClick');
             if(!ctrKeyPressed)
                 return;
 
@@ -151,6 +154,7 @@ var lev = new function(){
 
 
     function saveTag(){
+        console.log('saveTag');
         var saved = $('#tag_menu_notification_saved');
         saved.hide();
 
@@ -235,7 +239,7 @@ var lev = new function(){
 
         pulse.menu.hide().css({'top': h + 40, 'left': slope * w, 'zIndex': z.menu}).fadeIn(300, showMessageMenu);
 
-        $('html, body').animate({
+        $('body').animate({
             scrollTop: h - 100
         }, 500, callback);
     }
@@ -339,8 +343,6 @@ var lev = new function(){
         $('.tag_item_user_img').attr('src', 'images/users/1.jpg');
 
         $('.tag_item_snippit_link').html(pulse.url);
-
-        saveTag();
 
         if(pulse.tagType == 'img'){
             createImageMeme(pulse.target.attr('src'));
