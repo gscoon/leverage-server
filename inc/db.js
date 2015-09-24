@@ -11,7 +11,7 @@ var dbClass = function(){
     }
 
     this.saveTagText = function(t, callback){
-        var q = 'UPDATE tag SET pulse_text = $1 WHERE file_id = $2';
+        var q = 'UPDATE tag SET thoughts = $1 WHERE file_id = $2';
         var params = [t.thoughts, t.id];
         pqQuery(q, params, callback);
     }

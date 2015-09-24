@@ -1,4 +1,5 @@
 div#tag_menu
+    
     div#pulse_pointer
         div#pp_icon.pp_text
     div#tag_menu_notification_saved
@@ -6,32 +7,10 @@ div#tag_menu
 
     // 1. Tag Content
     div#tag_menu_content
-        
-        //div.custom_select
-            div.active_item
-                span.active_item_text Custom message:
-                span.selection_toggle_arrows
-            div.custom_select_list
-                div.custom_select_section_label Custom Message:
-                a.custom_select_item Write your own text
-                    span.custom_select_val {"type":"action", "val":"showCustomMessage"}
-                div.custom_select_section_label Or choose from these:
-                a.custom_select_item What do you think about this?
-                    span.custom_select_val {"type":"text", "val":"What do you think about this?"}
-                a.custom_select_item Look into this.
-                    span.custom_select_val {"type":"text", "val":"Look into this."}
-                a.custom_select_item How cool is this?
-                    span.custom_select_val {"type":"text", "val":"How cool is this?"}
-                a.custom_select_item This is what I was talking about.
-                    span.custom_select_val {"type":"text", "val":"This is what I was talking about."}
-                a.custom_select_item What's going on here?
-                    span.custom_select_val {"type":"text", "val":"What's going on here?"}
-                a.custom_select_item This is great.
-                    span.custom_select_val {"type":"text", "val":"This is great."}
-                a.custom_select_item This is terrible.
-                    span.custom_select_val {"type":"text", "val":"This is terrible."}
-        input#lev_comment_input(type="text")
-        textarea#lev_comment_textarea
+        #lev_input_container
+            img#pulse_user_image(src=user.imgSmall)
+            input#lev_comment_input(type="text")
+            textarea#lev_comment_textarea
         div#lev_comment_preset
         
         // buttons
@@ -105,4 +84,4 @@ div#tag_menu
         div#tm_loader
         div#tm_loader_message
     // close button
-    a#x.x
+    // a#x.x
