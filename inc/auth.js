@@ -3,9 +3,9 @@ var passportClass = function(){
     this.fb = require('./auth-facebook.js');
 
     this.handleToken = function(accessToken, refreshToken, profile, done, extID) {
-        // this is called after user returns to auth/[app]/callback
-        // also after the code is converted to a token
-        // there is a call done to pull user info
+        // this is called after user returns from auth/[app]/callback
+        // also after token is generated
+        // there is a function "done" used to pull user info
         // it now wants you to find or create a user in the database
 
         var user = null;

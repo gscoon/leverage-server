@@ -1,5 +1,4 @@
 div#tag_menu
-    
     div#pulse_pointer
         div#pp_icon.pp_text
     div#tag_menu_notification_saved
@@ -11,7 +10,6 @@ div#tag_menu
             img#pulse_user_image(src=user.imgSmall)
             input#lev_comment_input(type="text")
             textarea#lev_comment_textarea
-        div#lev_comment_preset
         
         // buttons
         // div.button_row
@@ -24,18 +22,61 @@ div#tag_menu
     // 2. Chain menu
     div#tag_menu_chain
         div#chain_selection_row
-            a#default_chain.active_chain My Pulse
-                input(type="hidden" value="1")
-            a WTF
-                input(type="hidden" value="2")
-            a This!
-                input(type="hidden" value="3")
-            a Hacking
-                input(type="hidden" value="4")
-            a Music
-                input(type="hidden" value="5")
+            a.chain_selection_option#default_chain My Pulse
+                input(type="hidden", value="1")
+            a.chain_selection_option WTF
+                input(type="hidden", value="2")
+            a.chain_selection_option This!
+                input(type="hidden", value="3")
+            a.chain_selection_option Hacking
+                input(type="hidden", value="4")
+            a.chain_selection_option Music
+                input(type="hidden", value="5")
             a#more_chain.nothing ...
-                input(type="hidden" value="6")
+                input(type="hidden", value="6")
+    div#chain_menu_expanded
+        // new expended submenu
+        div#chain_menu_expanded_select
+            div.chain_menu_expanded_header 
+                span Select a chain:
+        
+        // new chain submenu
+        div#chain_menu_expanded_new
+            div.chain_menu_expanded_header 
+                span Create a new chain:
+            div#chain_menu_expanded_new_form
+                div.chain_menu_expanded_new_form_row
+                    input#chain_menu_expanded_new_name(type="text", placeholder="Name your chain")
+                div.chain_menu_expanded_new_form_row
+                    label
+                        input#chain_menu_expanded_new_check(type='checkbox', checked=false)
+                        span Sub-chain
+                div.chain_menu_expanded_button_row
+                    a.chain_menu_expanded_button#chain_menu_save_new_button Add Chain
+                    a.chain_menu_expanded_text_button#chain_menu_cancel_new_button Cancel
+                    
+        // chain selection submenu
+        div#chain_menu_expanded_list
+            div#chain_menu_expanded_list_inner
+                a.chain_menu_expanded_list_option 
+                    span.chain_menu_expanded_text Hip Hop
+                    span.chain_menu_expanded_count 23 tags
+                    input(type="hidden", value="1")
+                a.chain_menu_expanded_list_option 
+                    span.chain_menu_expanded_text 2015 Elections
+                    span.chain_menu_expanded_count 4 tags
+                    input(type="hidden", value="1")
+                a.chain_menu_expanded_list_option 
+                    span.chain_menu_expanded_text Entrepreneurship
+                    span.chain_menu_expanded_count 3 tags
+                    input(type="hidden", value="1")
+                a.chain_menu_expanded_list_option 
+                    span.chain_menu_expanded_text Something else
+                    span.chain_menu_expanded_count 26 tags
+                    input(type="hidden", value="1")
+            div.chain_menu_expanded_button_row#chain_menu_expanded_button_row_new
+                a#chain_menu_expanded_new_button.chain_menu_expanded_button New Chain
+                
     // 2. Who
     div#tag_menu_who
         //div.tag_specify_row_label Who can see your tag?

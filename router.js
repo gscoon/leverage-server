@@ -5,7 +5,7 @@ var expressSession  = require("express-session");
 var methodOverride = require("method-override");
 var passport = require('passport');
 var logger = require('morgan');
-
+var pg = require('pg');
 
 module.exports = function(express, expressapp){
 
@@ -18,13 +18,18 @@ module.exports = function(express, expressapp){
     expressapp.use(cookieParser());
     expressapp.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
 
-    var MongoStore = require('connect-mongo')(expressSession );
+    //var MongoStore = require('connect-mongo')(expressSession );
+    pgSession = require('connect-pg-simple')(expressSession);
 
-    expressapp.use(expressSession ({
-            secret: 'keyboard cat',
-            resave: true,
-            saveUninitialized: true,
-            store: new MongoStore({ url: config.mongodb.connStr })
+    expressapp.use(expressSession({
+        secret: 'keyboard cat',
+        store: new pgSession({
+            conString : config.pgDB.connStr,
+            pg : pg
+        }),
+        resave: true,
+        saveUninitialized: true,
+        cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
     }));
 
     expressapp.use(passport.initialize());
@@ -46,7 +51,7 @@ module.exports = function(express, expressapp){
 
     passport.deserializeUser(function(uid, done) {
         console.log('deserializeUser');
-        app.mongo.getUserByID(uid, function(err, user){
+        app.db.getUserByID(uid, function(err, user){
             // console.log(err, user);
              done(null, user);
         });
@@ -78,10 +83,6 @@ module.exports = function(express, expressapp){
 
     // testing testing 1 2 3
     expressapp.all('/process', process.handleRequest.bind(process));
-
-    expressapp.get('/menu', function(req, res, next){
-        res.render('menu', { title: 'Dat menu'});
-    });
 
     expressapp.get('/dre', function(req, res, next){
         res.render('dre', { title: 'Dre Day'});

@@ -16,12 +16,40 @@ var dbClass = function(){
         pqQuery(q, params, callback);
     }
 
+    this.getUserByID = function(id, callback){
+        var q = "SELECT * FROM p_user WHERE user_id = $1"
+        var params = [id];
+        pqQuery(q, params, callback);
+    }
+
+    this.searchForExtensionByID = function(id, callback){
+        var q = "SELECT u.* FROM puser u JOIN puser_extension ext ON ext.user_id = u.user_id WHERE ext.extension_id = $1"
+        var params = [id];
+        pqQuery(q, params, callback);
+    }
+
+    this.saveNewChain = function(chainName, callback){
+        var ts = app.moment().format("YYYY-MM-DD HH:mm:ss");
+        var q = "INSERT INTO chain (name, timestamp) VALUES ($1, $2)  RETURNING id";
+        var params = [chainName, ts];
+        pqQuery(q, params, callback);
+    }
+
+    this.saveUserChain = function(u, c, callback){
+        var ts = app.moment().format("YYYY-MM-DD HH:mm:ss");
+        var q = "INSERT INTO puser_chain (user_id, chain_id, timestamp) VALUES ($1, $2, $3)  RETURNING id";
+        var params = [u, c, ts];
+        pqQuery(q, params, callback);
+    }
 
     function pqQuery(q, params, callback){
         pg.connect(config.pgDB.connStr, function(err, client, done) {
             console.log('Postgres Obj Created', err);
             client.query(q, params, function(err, result){
                 done();
+                // if this is a select, only return the rows
+                if(result.command == 'SELECT')
+                    result = result.rows;
                 callback(err, result);
             });
         });
