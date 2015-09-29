@@ -22,18 +22,16 @@ div#tag_menu
     // 2. Chain menu
     div#tag_menu_chain
         div#chain_selection_row
-            a.chain_selection_option#default_chain My Pulse
-                input(type="hidden", value="1")
-            a.chain_selection_option WTF
-                input(type="hidden", value="2")
-            a.chain_selection_option This!
-                input(type="hidden", value="3")
-            a.chain_selection_option Hacking
-                input(type="hidden", value="4")
-            a.chain_selection_option Music
-                input(type="hidden", value="5")
+            each val, index in chainTop
+                if val.is_default == true
+                    a.chain_selection_option#default_chain #{val.name}
+                        input(type="hidden", value=val.chain_id)
+                else 
+                    a.chain_selection_option #{val.name}
+                        input(type="hidden", value=val.chain_id)
+                        
             a#more_chain.nothing ...
-                input(type="hidden", value="6")
+
     div#chain_menu_expanded
         // new expended submenu
         div#chain_menu_expanded_select
@@ -58,22 +56,16 @@ div#tag_menu
         // chain selection submenu
         div#chain_menu_expanded_list
             div#chain_menu_expanded_list_inner
-                a.chain_menu_expanded_list_option 
-                    span.chain_menu_expanded_text Hip Hop
-                    span.chain_menu_expanded_count 23 tags
-                    input(type="hidden", value="1")
-                a.chain_menu_expanded_list_option 
-                    span.chain_menu_expanded_text 2015 Elections
-                    span.chain_menu_expanded_count 4 tags
-                    input(type="hidden", value="1")
-                a.chain_menu_expanded_list_option 
-                    span.chain_menu_expanded_text Entrepreneurship
-                    span.chain_menu_expanded_count 3 tags
-                    input(type="hidden", value="1")
-                a.chain_menu_expanded_list_option 
-                    span.chain_menu_expanded_text Something else
-                    span.chain_menu_expanded_count 26 tags
-                    input(type="hidden", value="1")
+                // LOOP!!!!
+                each val, index in chainList
+                    div.chain_menu_expanded_list_row
+                        a.chain_menu_expanded_list_option 
+                            span.chain_menu_expanded_text #{val.name}
+                            span.chain_menu_expanded_count #{val.ccount}
+                            input(type="hidden", value=val.chain_id)
+                        if val.is_default == false
+                            a.chain_menu_expanded_list_delete Delete
+                            input(type="hidden", value=val.chain_id)
             div.chain_menu_expanded_button_row#chain_menu_expanded_button_row_new
                 a#chain_menu_expanded_new_button.chain_menu_expanded_button New Chain
                 

@@ -1,24 +1,41 @@
-var mysql = require('mysql');
 var pg = require('pg');
 
 var dbClass = function(){
 
-    this.addTagEntry = function(fileID, t, callback){
+    this.addTagEntry = function(t, callback){
         var ts = app.moment().format("YYYY-MM-DD HH:mm:ss");
-        var q = "INSERT INTO tag (url, file_id, window_width, window_height, share_status, pulse_text, thoughts, zoom, pulsePos, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)";
-        var params = [t.url, fileID, t.width, t.height, t.share, t.pulseText, t.thoughts, t.zoom, t.pulsePos, ts];
+        var q = "INSERT INTO tag (tag_id, file_id, url, window_width, window_height, share_status, pulse_text, thoughts, zoom, pulsePos, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING tag_id";
+        var params = [t.id, t.file_id, t.url, t.width, t.height, t.share, t.pulseText, t.thoughts, t.zoom, t.pulsePos, ts];
         pqQuery(q, params, callback);
     }
 
     this.saveTagText = function(t, callback){
-        var q = 'UPDATE tag SET thoughts = $1 WHERE file_id = $2';
+        var q = 'UPDATE tag SET thoughts = $1 WHERE tag_id = $2';
         var params = [t.thoughts, t.id];
         pqQuery(q, params, callback);
     }
 
+    this.saveTagChain = function(tid, cid, callback){
+        var q = 'UPDATE tag SET chain_id = $1 WHERE tag_id = $2';
+        var params = [cid, tid];
+        pqQuery(q, params, callback);
+    }
+
     this.getUserByID = function(id, callback){
-        var q = "SELECT * FROM p_user WHERE user_id = $1"
+        var q = "SELECT * FROM p_user WHERE user_id = $1";
         var params = [id];
+        pqQuery(q, params, callback);
+    }
+
+    this.getUserChains = function(uid, callback){
+        var q = "SELECT c.*, cc.ccount FROM puser_chain pc JOIN chain c ON c.chain_id = pc.chain_id LEFT JOIN (SELECT chain_id, count(chain_id) as ccount FROM tag WHERE user_id = $1 GROUP BY chain_id) cc ON cc.chain_id = c.chain_id  WHERE pc.user_id = $1";
+        var params = [uid];
+        pqQuery(q, params, callback);
+    }
+
+    this.deleteChain = function(cid, callback){
+        var q = "DELETE FROM chain WHERE chain_id = $1";
+        var params = [cid];
         pqQuery(q, params, callback);
     }
 
@@ -28,10 +45,10 @@ var dbClass = function(){
         pqQuery(q, params, callback);
     }
 
-    this.saveNewChain = function(chainName, callback){
+    this.saveNewChain = function(chainName, isDefault, callback){
         var ts = app.moment().format("YYYY-MM-DD HH:mm:ss");
-        var q = "INSERT INTO chain (name, timestamp) VALUES ($1, $2)  RETURNING chain_id";
-        var params = [chainName, ts];
+        var q = "INSERT INTO chain (name, is_default, timestamp) VALUES ($1, $2, $3) RETURNING chain_id";
+        var params = [chainName, isDefault, ts];
         pqQuery(q, params, callback);
     }
 
