@@ -8,20 +8,13 @@ div#tag_menu
     div#tag_menu_content
         #lev_input_container
             img#pulse_user_image(src=user.imgSmall)
-            input#lev_comment_input(type="text")
-            textarea#lev_comment_textarea
-        
-        // buttons
-        // div.button_row
-            //a#tag_share_button() Share Tag
-                span.next_arrow.button_arrow
-            
-            a#tag_save_message_button Save Message
-                span.plus_icon
-            //a.tag_hide_button Hide
+            input#pulse_comment_input(type="text")
+            textarea#pulse_comment_textarea
+
     // 2. Chain menu
     div#tag_menu_chain
         div#chain_selection_row
+            // LOOP LOOP LOOP LOOP!!!!
             each val, index in chainTop
                 if val.is_default == true
                     a.chain_selection_option#default_chain #{val.name}
@@ -56,7 +49,7 @@ div#tag_menu
         // chain selection submenu
         div#chain_menu_expanded_list
             div#chain_menu_expanded_list_inner
-                // LOOP!!!!
+                // LOOP LOOP LOOP LOOP LOOP LOOP!!!!
                 each val, index in chainList
                     div.chain_menu_expanded_list_row
                         a.chain_menu_expanded_list_option 
@@ -64,11 +57,11 @@ div#tag_menu
                             span.chain_menu_expanded_count #{val.ccount}
                             input(type="hidden", value=val.chain_id)
                         if val.is_default == false
-                            a.chain_menu_expanded_list_delete Delete
-                            input(type="hidden", value=val.chain_id)
+                            a.chain_menu_expanded_list_delete(id="chain_delete_"+val.chain_id) Delete
+                                input(type="hidden", value=val.chain_id)
             div.chain_menu_expanded_button_row#chain_menu_expanded_button_row_new
                 a#chain_menu_expanded_new_button.chain_menu_expanded_button New Chain
-                
+                    
     // 2. Who
     div#tag_menu_who
         //div.tag_specify_row_label Who can see your tag?
@@ -118,3 +111,5 @@ div#tag_menu
         div#tm_loader_message
     // close button
     // a#x.x
+div#general_overlay
+div#pulse_preview 

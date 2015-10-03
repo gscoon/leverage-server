@@ -2,10 +2,10 @@ var pg = require('pg');
 
 var dbClass = function(){
 
-    this.addTagEntry = function(t, callback){
+    this.saveTag = function(t, callback){
         var ts = app.moment().format("YYYY-MM-DD HH:mm:ss");
-        var q = "INSERT INTO tag (tag_id, file_id, url, window_width, window_height, share_status, pulse_text, thoughts, zoom, pulsePos, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING tag_id";
-        var params = [t.id, t.file_id, t.url, t.width, t.height, t.share, t.pulseText, t.thoughts, t.zoom, t.pulsePos, ts];
+        var q = "INSERT INTO tag (tag_id, file_id, user_id, chain_id, url, share_status, pulse_text, thoughts, zoom, placement, family, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *";
+        var params = [t.id, t.fid, t.uid, t.cid, t.url, t.share, t.pulseText, t.thoughts, t.zoom, t.pulsePos, t.family, ts];
         pqQuery(q, params, callback);
     }
 
@@ -40,7 +40,7 @@ var dbClass = function(){
     }
 
     this.searchForExtensionByID = function(id, callback){
-        var q = "SELECT u.user_id, u.name, u.image_mini FROM puser u JOIN puser_extension ext ON ext.user_id = u.user_id WHERE ext.extension_id = $1"
+        var q = "SELECT u.user_id, u.name, u.image_mini, u.default_chain_id FROM puser u JOIN puser_extension ext ON ext.user_id = u.user_id WHERE ext.extension_id = $1"
         var params = [id];
         pqQuery(q, params, callback);
     }
@@ -59,9 +59,14 @@ var dbClass = function(){
         pqQuery(q, params, callback);
     }
 
+    this.getPageTags = function(uid, url, callback){
+        var q = "SELECT t.* FROM tag t JOIN puser_chain uc ON uc.chain_id = t.chain_id WHERE uc.user_id = $1 AND t.url = $2";
+        var params = [uid, url];
+        pqQuery(q, params, callback);
+    }
+
     function pqQuery(q, params, callback){
         pg.connect(config.pgDB.connStr, function(err, client, done) {
-            console.log('Postgres Obj Created', 'error', err);
             client.query(q, params, function(err, result){
                 done();
                 // if this is a select, only return the rows
