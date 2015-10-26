@@ -4,8 +4,20 @@ var dbClass = function(){
 
     this.saveTag = function(t, callback){
         var ts = app.moment().format("YYYY-MM-DD HH:mm:ss");
-        var q = "INSERT INTO tag (tag_id, file_id, user_id, chain_id, url, share_status, pulse_text, thoughts, zoom, placement, family, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *";
+        var q = "INSERT INTO tag (tag_id, file_id, user_id, chain_id, url, share_status, inner_text, thoughts, zoom, placement, family, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *";
         var params = [t.id, t.fid, t.uid, t.cid, t.url, t.share, t.pulseText, t.thoughts, t.zoom, t.pulsePos, t.family, ts];
+        pqQuery(q, params, callback);
+    }
+
+    this.getTagDetails = function(tid, callback){
+        var q = "SELECT t.*, u.name, u.user_image FROM tag t JOIN puser u ON u.user_id = t.user_id WHERE t.tag_id = $1";
+        var params = [tid];
+        pqQuery(q, params, callback);
+    }
+
+    this.deleteTag = function(t, callback){
+        var q = 'DELETE FROM tag WHERE tag_id = $1 AND user_id = $2';
+        var params = [t.id, t.uid];
         pqQuery(q, params, callback);
     }
 
@@ -40,7 +52,7 @@ var dbClass = function(){
     }
 
     this.searchForExtensionByID = function(id, callback){
-        var q = "SELECT u.user_id, u.name, u.image_mini, u.default_chain_id FROM puser u JOIN puser_extension ext ON ext.user_id = u.user_id WHERE ext.extension_id = $1"
+        var q = "SELECT u.user_id, u.name, u.user_image, u.default_chain_id FROM puser u JOIN puser_extension ext ON ext.user_id = u.user_id WHERE ext.extension_id = $1"
         var params = [id];
         pqQuery(q, params, callback);
     }
@@ -60,8 +72,14 @@ var dbClass = function(){
     }
 
     this.getPageTags = function(uid, url, callback){
-        var q = "SELECT t.* FROM tag t JOIN puser_chain uc ON uc.chain_id = t.chain_id WHERE uc.user_id = $1 AND t.url = $2";
+        var q = "SELECT t.*, u.name, u.user_image FROM tag t JOIN puser_chain uc ON uc.chain_id = t.chain_id JOIN puser u ON u.user_id = t.user_id WHERE uc.user_id = $1 AND t.url = $2";
         var params = [uid, url];
+        pqQuery(q, params, callback);
+    }
+
+    this.getTagComments = function(tid, callback){
+        var q = "SELECT * from tag_comment WHERE tag_id = $1";
+        var params = [tid];
         pqQuery(q, params, callback);
     }
 

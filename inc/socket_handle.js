@@ -21,10 +21,13 @@ module.exports = new function(){
             socket.on('get_pulse_menu', socketListener.bind(sendPulseMenu));
             socket.on('save_new_chain', socketListener.bind(saveNewChain));
             socket.on('save_tag', socketListener.bind(saveTag));
+            socket.on('undo_tag', socketListener.bind(undoTag));
             socket.on('save_tag_text', socketListener.bind(saveTagText));
             socket.on('save_tag_chain', socketListener.bind(saveTagChain));
             socket.on('delete_chain', socketListener.bind(deleteChain));
             socket.on('get_page_tags', socketListener.bind(getPageTags));
+            socket.on('get_tag_content', socketListener.bind(getTagContent));
+
 
             function socketListener(data){
                 var func = this;
@@ -43,7 +46,6 @@ module.exports = new function(){
                     console.log('searchForExtensionByID', u);
                 });
             }
-
         });
     }
 
@@ -61,16 +63,14 @@ module.exports = new function(){
         var s = sockets[extID];
         // set jade file path
         var menuPath = path.resolve(app.base, 'views/tag_menu.jade');
-        console.log('menu path', menuPath);
 
         // set user image
-        var miniImgSrc = path.resolve(app.base, "files/user", u.image_mini);
+        var userImages = returnUserImages(u.user_image);
 
         // get user tags
         var tags = app.db.getUserChains(u.user_id, function(err, results){
-            var userObj = {imgSmall: imageToBase64(miniImgSrc)};
             chainObj = sortChainOptions(results);
-            var menuHTML = jade.renderFile(menuPath, {user: userObj, chainTop: chainObj.top, chainList: chainObj.list});
+            var menuHTML = jade.renderFile(menuPath, {user: userImages, chainTop: chainObj.top, chainList: chainObj.list});
             s.emit('menu', {succces: (err == null), menu: menuHTML});
         });
 
@@ -79,8 +79,9 @@ module.exports = new function(){
     function getPageTags(reqObj, extID){
         var u = ioUser[extID];
         var s = sockets[extID];
-
+        console.log('getPageTags');
         app.db.getPageTags(u.user_id, reqObj.url, function(err, results){
+            console.log(err);
             s.emit('callback', {
                 success: (err == null),
                 callbackID: reqObj.callbackID,
@@ -88,7 +89,35 @@ module.exports = new function(){
                 results: results
             });
         });
+    }
 
+    function getTagContent(reqObj, extID){
+        var u = ioUser[extID];
+        var s = sockets[extID];
+
+        var retObj = {success:false, callbackID: reqObj.callbackID, action: 'tag_content'};
+
+        async.waterfall([
+            function(cb){
+                // get tag details
+                app.db.getTagDetails(reqObj.tagID, cb);
+            },
+            function(r1, cb){
+                if(r1.length != 1) cb(true); // error
+                // get actual images
+                retObj.detail = r1[0];
+                retObj.userImage = returnUserImages(retObj.detail.user_image);
+                // then get tag comments
+                app.db.getTagComments(reqObj.tagID, cb);
+            },
+            function(r2, cb){
+                retObj.comments = r2;
+                cb(null); // finish with no errors
+            }
+        ], function(err, res){
+            retObj.success = (err == null);
+            s.emit('callback', retObj)
+        });
     }
 
     function saveTag(reqObj, extID){
@@ -111,6 +140,21 @@ module.exports = new function(){
                 result: result.rows
             });
         });
+    }
+
+    function undoTag(reqObj, extID){
+        var u = ioUser[extID];
+        var s = sockets[extID];
+
+        reqObj.uid = u.user_id;
+        app.db.deleteTag(reqObj, function(err, result){
+            console.log('undoTag', err);
+            s.emit('callback', {
+                success: (err == null),
+                callbackID: reqObj.callbackID,
+                id: reqObj.id
+            });
+        })
     }
 
     function saveTagText(reqObj, extID){
@@ -220,6 +264,10 @@ module.exports = new function(){
         return text;
     }
 
-
+    function returnUserImages(ui){
+        var miniImgSrc = path.resolve(app.base, "files/user/small/", ui.small);
+        var largeImgSrc = path.resolve(app.base, "files/user/large/", ui.large);
+        return {imgSmall: imageToBase64(miniImgSrc), imgLarge: imageToBase64(largeImgSrc)};
+    }
 
 }

@@ -84,8 +84,8 @@ module.exports = function(express, expressapp){
     // testing testing 1 2 3
     expressapp.all('/process', process.handleRequest.bind(process));
 
-    expressapp.get('/dre', function(req, res, next){
-        res.render('dre', { title: 'Dre Day'});
+    expressapp.get('/disc', function(req, res, next){
+        res.render('discussion', { title: 'Dre Day'});
     });
 
 }
