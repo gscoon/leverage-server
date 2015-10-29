@@ -8,7 +8,7 @@ var util = require("util");
 module.exports = new function(){
     var io = null;
     var sockets = {};
-    var ioUser = {};
+    var users = {};
 
     this.start = function(_io){
         io = _io;
@@ -17,7 +17,6 @@ module.exports = new function(){
             var extID = null;
 
             socket.on('extension_check', handleExtension);
-            socket.on('get_content', getContent.bind(extID));
             socket.on('get_pulse_menu', socketListener.bind(sendPulseMenu));
             socket.on('save_new_chain', socketListener.bind(saveNewChain));
             socket.on('save_tag', socketListener.bind(saveTag));
@@ -27,7 +26,9 @@ module.exports = new function(){
             socket.on('delete_chain', socketListener.bind(deleteChain));
             socket.on('get_page_tags', socketListener.bind(getPageTags));
             socket.on('get_tag_content', socketListener.bind(getTagContent));
-
+            socket.on('save_tag_comment', socketListener.bind(saveTagComment));
+            socket.on('delete_discussion_tag', socketListener.bind(deleteTag));
+            socket.on('save_image', socketListener.bind(saveTagImage));
 
             function socketListener(data){
                 var func = this;
@@ -37,29 +38,32 @@ module.exports = new function(){
             function handleExtension(data){
                 extID = data.extID;
                 sockets[extID] = socket;
-                ioUser[extID] = {};
+                users[extID] = {};
 
                 app.db.searchForExtensionByID(extID, function(err, results){
-                    var u = results[0];
-                    ioUser[extID] = u;
-                    socket.emit('user', u);
-                    console.log('searchForExtensionByID', u);
+                    var ret = {success:false, user:null};
+                    if(results.length == 0)
+                        return socket.emit('user', ret);
+
+                    ret.success = true;
+                    ret.user = results[0];
+                    ret.user.images = returnUserImages(ret.user.user_image);
+
+                    users[extID] = ret.user;
+                    app.db.getUserChains(ret.user.user_id, function(err, chains){
+                        // change the array index from 0,1,... to the chain id
+                        ret.user.chains = setArrayIndex(chains, 'chain_id');
+                        socket.emit('user', ret);
+                    });
+                    console.log('handleExtension');
                 });
             }
         });
     }
 
-    function getContent(reqObj, extID){
-        var u = ioUser[extID];
-        var s = sockets[extID];
-
-        app.api.fb.pullContent(u, function(err, results){
-            s.emit('content', {err: err, results: results});
-        });
-    }
-
     function sendPulseMenu(reqObj, extID){
-        var u = ioUser[extID];
+        console.log('sendPulseMenu');
+        var u = users[extID];
         var s = sockets[extID];
         // set jade file path
         var menuPath = path.resolve(app.base, 'views/tag_menu.jade');
@@ -70,58 +74,14 @@ module.exports = new function(){
         // get user tags
         var tags = app.db.getUserChains(u.user_id, function(err, results){
             chainObj = sortChainOptions(results);
-            var menuHTML = jade.renderFile(menuPath, {user: userImages, chainTop: chainObj.top, chainList: chainObj.list});
+            var menuHTML = jade.renderFile(menuPath, {chainTop: chainObj.top, chainList: chainObj.list});
             s.emit('menu', {succces: (err == null), menu: menuHTML});
         });
 
     }
 
-    function getPageTags(reqObj, extID){
-        var u = ioUser[extID];
-        var s = sockets[extID];
-        console.log('getPageTags');
-        app.db.getPageTags(u.user_id, reqObj.url, function(err, results){
-            console.log(err);
-            s.emit('callback', {
-                success: (err == null),
-                callbackID: reqObj.callbackID,
-                action: 'page_tags',
-                results: results
-            });
-        });
-    }
-
-    function getTagContent(reqObj, extID){
-        var u = ioUser[extID];
-        var s = sockets[extID];
-
-        var retObj = {success:false, callbackID: reqObj.callbackID, action: 'tag_content'};
-
-        async.waterfall([
-            function(cb){
-                // get tag details
-                app.db.getTagDetails(reqObj.tagID, cb);
-            },
-            function(r1, cb){
-                if(r1.length != 1) cb(true); // error
-                // get actual images
-                retObj.detail = r1[0];
-                retObj.userImage = returnUserImages(retObj.detail.user_image);
-                // then get tag comments
-                app.db.getTagComments(reqObj.tagID, cb);
-            },
-            function(r2, cb){
-                retObj.comments = r2;
-                cb(null); // finish with no errors
-            }
-        ], function(err, res){
-            retObj.success = (err == null);
-            s.emit('callback', retObj)
-        });
-    }
-
     function saveTag(reqObj, extID){
-        var u = ioUser[extID];
+        var u = users[extID];
         var s = sockets[extID];
 
         reqObj.id = returnRandID(15); // tag ID
@@ -142,8 +102,65 @@ module.exports = new function(){
         });
     }
 
+    function getPageTags(reqObj, extID){
+        var u = users[extID];
+        var s = sockets[extID];
+        console.log('getPageTags');
+        app.db.getPageTags(u.user_id, reqObj.url, function(err, results){
+            console.log(err);
+            s.emit('callback', {
+                success: (err == null),
+                callbackID: reqObj.callbackID,
+                action: 'page_tags',
+                results: results
+            });
+        });
+    }
+
+    // discussion contente
+    function getTagContent(reqObj, extID){
+        var u = users[extID];
+        var s = sockets[extID];
+
+        var retObj = {success:false, callbackID: reqObj.callbackID, action: 'tag_content'};
+
+        async.waterfall([
+            function(cb){
+                // get tag details
+                app.db.getTagDetails(reqObj.tagID, cb);
+            },
+            function(r1, cb){
+                if(r1.length != 1) cb(true); // error
+                retObj.detail = r1[0];
+                // get tag comments
+                app.db.getTagComments(reqObj.tagID, cb);
+            },
+            function(r2, cb){
+                retObj.comments = r2;
+                cb(null); // finish with no errors
+            }
+        ], function(err, res){
+            retObj.success = (err == null);
+            s.emit('callback', retObj)
+        });
+    }
+
+    // discussion comment
+    function saveTagComment(req, extID){
+        var u = users[extID];
+        var s = sockets[extID];
+        var ret = {success:false, callbackID: req.callbackID, action: 'save_tag_comment'};
+        req.id = ret.id = returnRandID(15); // tag ID
+        req.user_id = u.user_id; // reset user id
+        app.db.saveTagComment(req, function(err, result){
+            console.log('saveTagComment', result);
+            ret.success = (err == null);
+            s.emit('callback', ret);
+        });
+    }
+
     function undoTag(reqObj, extID){
-        var u = ioUser[extID];
+        var u = users[extID];
         var s = sockets[extID];
 
         reqObj.uid = u.user_id;
@@ -157,21 +174,34 @@ module.exports = new function(){
         })
     }
 
+    function deleteTag(req, extID){
+        var u = users[extID];
+        var s = sockets[extID];
+        req.success = false;
+        req.uid = u.user_id;
+        req.action = 'delete_discussion_tag';
+        app.db.deleteTag(req, function(err, result){
+            req.success = (err == null);
+            console.log('deleteTag', err, req);
+            s.emit('callback', req);
+        });
+    }
+
     function saveTagText(reqObj, extID){
-        var u = ioUser[extID];
+        var u = users[extID];
         var s = sockets[extID];
 
         app.db.saveTagText(reqObj, function(err, result){
-            console.log('saveTagText', err);
+            console.log('saveTagText', err, reqObj);
             s.emit('callback', {success:(err == null), callbackID: reqObj.callbackID, action: 'saved_tag_text'});
         });
     }
 
     function saveTagChain(reqObj, extID){
-        var u = ioUser[extID];
+        var u = users[extID];
         var s = sockets[extID];
 
-        app.db.saveTagChain(reqObj.tagID, reqObj.chainID, function(err, result){
+        app.db.updateTagChain(reqObj.tagID, reqObj.chainID, function(err, result){
             console.log('saveTagChain', err);
             s.emit('callback', {success:(err == null), callbackID: reqObj.callbackID, action: 'saved_tag_chain'});
 
@@ -181,7 +211,7 @@ module.exports = new function(){
     }
 
     function saveNewChain(data, extID){
-        var u = ioUser[extID];
+        var u = users[extID];
         var s = sockets[extID];
         var isDefault = false;
         var retObj = {callbackID: data.callbackID, action: 'saved_chain', success:true};
@@ -191,17 +221,17 @@ module.exports = new function(){
             if(err) return emitError(s, retObj, "DB error 1");
 
             // add user chain ...
-            var chainID = result.rows[0].chain_id;
-            app.db.saveUserChain(u.user_id, chainID, function(err2, result2){
+            var chain = result.rows[0].chain_id;
+            app.db.saveUserChain(u.user_id, chain.chain_id, function(err2, result2){
                 if(err2) return emitError(s, retObj, "DB error 2");
-                retObj.chainID = chainID;
+                retObj.chain = chain;
                 s.emit('callback', retObj);
             });
         });
     }
 
     function deleteChain(data, extID){
-        var u = ioUser[extID];
+        var u = users[extID];
         var s = sockets[extID];
         console.log('delete chain', data);
         var retObj = {action: 'deleted_chain', callbackID: data.callbackID, success:true, chainID: data.chainID};
@@ -215,6 +245,22 @@ module.exports = new function(){
         });
     }
 
+    function saveTagImage(data, extID){
+        var u = users[extID];
+        var s = sockets[extID];
+
+        if(data.imageType != 'target' && data.imageType != 'generic' && data.imageType != 'meme')
+            return console.log('bad image type');
+
+        var fileName = data.fileID + '.' + data.ext;
+        var savePath = path.resolve(__dirname, '../files', data.imageType, fileName);
+        var imageBuffer = decodeBase64Image(data.dataURL);
+
+        fs.writeFile(savePath, imageBuffer.data, function(err) {
+            console.log('image_saved', err, app.moment().format("YYYY-MM-DD HH:mm:ss"));
+        });
+    }
+
     function emitError(s, o, m){
         o.success = false;
         o.message = m;
@@ -223,7 +269,7 @@ module.exports = new function(){
 
     this.sendAuthUpdate = function(extID, results){
         var socket = sockets[extID];
-        ioUser[extID] = results;
+        users[extID] = results;
         socket.emit('auth_status', results);
     }
 
@@ -255,6 +301,20 @@ module.exports = new function(){
         return util.format("data:%s;base64,%s", mime.lookup(src), data);
     }
 
+    function decodeBase64Image(dataString) {
+        var matches = dataString.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/),
+        response = {};
+
+        if(matches.length !== 3)
+            return new Error('Invalid input string');
+
+
+        response.type = matches[1];
+        response.data = new Buffer(matches[2], 'base64');
+
+        return response;
+    }
+
     function returnRandID(len){
         var text = "";
         var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -267,7 +327,15 @@ module.exports = new function(){
     function returnUserImages(ui){
         var miniImgSrc = path.resolve(app.base, "files/user/small/", ui.small);
         var largeImgSrc = path.resolve(app.base, "files/user/large/", ui.large);
-        return {imgSmall: imageToBase64(miniImgSrc), imgLarge: imageToBase64(largeImgSrc)};
+        return {small: imageToBase64(miniImgSrc), large: imageToBase64(largeImgSrc)};
+    }
+
+    function setArrayIndex(arr, index){
+        var newArray = {};
+        arr.forEach(function(a){
+            newArray[a[index]] = a;
+        });
+        return newArray;
     }
 
 }

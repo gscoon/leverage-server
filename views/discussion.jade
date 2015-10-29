@@ -3,17 +3,29 @@ div#active_discussion_container
         div#active_discussion_tagger
             img
         div#active_discussion_meta_right
-            div#active_discussion_name
-            div#active_discussion_url
-            div#active_discussion_time
-        
-    div#active_discussion_body
+            div#active_discussion_name                
+            div.active_discussion_meta_row    
+                span#active_discussion_url
+            div.active_discussion_meta_row    
+                span#active_discussion_time
+    div#active_discussion_op
+        // span#active_discussion_chain
+        // | : 
+        span#active_discussion_op_span
     div#active_discussion_comment_outer
     div#active_discussion_response
-        img#active_discussion_response_img(src=user.imgSmall)
-        input#active_discussion_response_input(type="input", placeholder="Write a comment")
+        img#active_discussion_response_img
+        input#active_discussion_response_input(type="input", placeholder="Write a comment...")
     div#active_discussion_comment_template
-        img.active_discussion_comment_image
-        div.active_discussion_comment_container
-            span.active_discussion_commentor
-            span.active_discussion_comment_body
+        div.active_discussion_comment_row
+            img.active_discussion_comment_image
+            div.active_discussion_comment_container
+                span.active_discussion_commentor
+                span.active_discussion_comment_body
+            div.active_discussion_comment_details
+                span.active_discussion_comment_ts
+    a#active_discussion_x
+    a#active_discussion_arrow
+    div#active_discussion_menu
+        a#active_discussion_delete Delete Tag
+        a#active_discussion_menu_hide Hide Menu

@@ -10,7 +10,7 @@ var dbClass = function(){
     }
 
     this.getTagDetails = function(tid, callback){
-        var q = "SELECT t.*, u.name, u.user_image FROM tag t JOIN puser u ON u.user_id = t.user_id WHERE t.tag_id = $1";
+        var q = "SELECT t.*, u.name, u.user_image, c.name as chain_name FROM tag t JOIN puser u ON u.user_id = t.user_id JOIN chain c ON c.chain_id = t.chain_id WHERE t.tag_id = $1";
         var params = [tid];
         pqQuery(q, params, callback);
     }
@@ -27,7 +27,7 @@ var dbClass = function(){
         pqQuery(q, params, callback);
     }
 
-    this.saveTagChain = function(tid, cid, callback){
+    this.updateTagChain = function(tid, cid, callback){
         var q = 'UPDATE tag SET chain_id = $1 WHERE tag_id = $2';
         var params = [cid, tid];
         pqQuery(q, params, callback);
@@ -72,13 +72,20 @@ var dbClass = function(){
     }
 
     this.getPageTags = function(uid, url, callback){
-        var q = "SELECT t.*, u.name, u.user_image FROM tag t JOIN puser_chain uc ON uc.chain_id = t.chain_id JOIN puser u ON u.user_id = t.user_id WHERE uc.user_id = $1 AND t.url = $2";
+        var q = "SELECT t.*, u.name, u.user_image, c.name as chain_name FROM tag t JOIN puser_chain uc ON uc.chain_id = t.chain_id JOIN puser u ON u.user_id = t.user_id JOIN chain c ON c.chain_id = t.chain_id WHERE uc.user_id = $1 AND t.url = $2";
         var params = [uid, url];
         pqQuery(q, params, callback);
     }
 
+    this.saveTagComment = function(c, callback){
+        var ts = app.moment().format("YYYY-MM-DD HH:mm:ss");
+        var q = "INSERT INTO tag_comment (comment_id, tag_id, user_id, body, timestamp) VALUES ($1, $2, $3, $4, $5)";
+        var params = [c.id, c.tag_id, c.user_id, c.body, ts];
+        pqQuery(q, params, callback);
+    }
+
     this.getTagComments = function(tid, callback){
-        var q = "SELECT * from tag_comment WHERE tag_id = $1";
+        var q = "SELECT tc.*, u.name from tag_comment tc JOIN puser u ON u.user_id = tc.user_id WHERE tc.tag_id = $1";
         var params = [tid];
         pqQuery(q, params, callback);
     }
