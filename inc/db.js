@@ -2,6 +2,13 @@ var pg = require('pg');
 
 var dbClass = function(){
 
+    this.getUserTags = function(t, callback){
+        var limit = ('limit' in t)?t.limit:10;
+        var q = "SELECT * FROM tag WHERE user_id = $1 ORDER BY timestamp DESC LIMIT $2";
+        var params = [t.uid, t.limit];
+        pqQuery(q, params, callback);
+    }
+
     this.saveTag = function(t, callback){
         var ts = app.moment().format("YYYY-MM-DD HH:mm:ss");
         var q = "INSERT INTO tag (tag_id, file_id, user_id, chain_id, url, share_status, inner_text, thoughts, zoom, placement, family, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *";
@@ -31,6 +38,24 @@ var dbClass = function(){
         var q = 'UPDATE tag SET chain_id = $1 WHERE tag_id = $2';
         var params = [cid, tid];
         pqQuery(q, params, callback);
+    }
+
+    this.updateSingleFieled = function(f, callback){
+        var q = 'UPDATE ' + f.table + ' SET ' + f.setField + ' = $1 WHERE ' + f.whereField + ' = $2';
+        var params = [f.setValue, f.whereValue];
+        pqQuery(q, params, callback);
+    }
+
+    this.getSingleField = function(o, callback){
+        var q = 'SELECT ' + o.selectField + ' FROM ' + o.table + ' WHERE ' + o.whereField + ' = $1';
+        var params = [o.whereValue];
+        pqQuery(q, params, function(err, results){
+            var ret = null;
+            if(!err && results.length > 0)
+                ret = results[0][o.selectField];
+
+            callback(err, ret);
+        });
     }
 
     this.getUserByID = function(id, callback){

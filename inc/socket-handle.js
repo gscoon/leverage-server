@@ -14,7 +14,7 @@ module.exports = new function(){
         io = _io;
 
         io.on('connection', function (socket) {
-            var extID = null;
+            var conn = {extID: null, waitingFuncs: [], searchAttempt: 0};
 
             socket.on('extension_check', handleExtension);
             socket.on('get_pulse_menu', socketListener.bind(sendPulseMenu));
@@ -30,17 +30,12 @@ module.exports = new function(){
             socket.on('delete_discussion_tag', socketListener.bind(deleteTag));
             socket.on('save_image', socketListener.bind(saveTagImage));
 
-            function socketListener(data){
-                var func = this;
-                func(data, extID);
-            }
-
             function handleExtension(data){
-                extID = data.extID;
-                sockets[extID] = socket;
-                users[extID] = {};
+                conn.extID = data.extID;
+                sockets[conn.extID] = socket;
+                users[conn.extID] = {};
 
-                app.db.searchForExtensionByID(extID, function(err, results){
+                app.db.searchForExtensionByID(conn.extID, function(err, results){
                     var ret = {success:false, user:null};
                     if(results.length == 0)
                         return socket.emit('user', ret);
@@ -49,49 +44,70 @@ module.exports = new function(){
                     ret.user = results[0];
                     ret.user.images = returnUserImages(ret.user.user_image);
 
-                    users[extID] = ret.user;
+                    users[conn.extID] = ret.user;
                     app.db.getUserChains(ret.user.user_id, function(err, chains){
                         // change the array index from 0,1,... to the chain id
                         ret.user.chains = setArrayIndex(chains, 'chain_id');
                         socket.emit('user', ret);
                     });
-                    console.log('handleExtension');
+                    console.log('connection variables set up');
+                    if(conn.waitingFuncs.length > 0){
+                        conn.waitingFuncs.forEach(function(f, i){
+                            if(f != null){
+                                f();
+                                conn.waitingFuncs[i] = null;
+                            }
+                        });
+                    }
                 });
             }
+
+            function socketListener(data){
+                var func = this;
+
+                if(conn.extID == null){ //conn.searchAttempt <= 5
+                    // restablish variables since server was restarted or whatever
+                    console.log('reconnection, extID: ', data.extID);
+                    conn.searchAttempt++;
+                    conn.waitingFuncs.push(socketListener.bind(func, data));
+                    return handleExtension(data);
+                }
+                console.log('socket listener', 'extID: ', data.extID);
+
+                var me = {ext: conn.extID, u: users[conn.extID], s: sockets[conn.extID]}
+
+                func(data, me);
+            }
+
         });
     }
 
-    function sendPulseMenu(reqObj, extID){
+    function sendPulseMenu(reqObj, conn){
         console.log('sendPulseMenu');
-        var u = users[extID];
-        var s = sockets[extID];
         // set jade file path
         var menuPath = path.resolve(app.base, 'views/tag_menu.jade');
 
         // set user image
-        var userImages = returnUserImages(u.user_image);
+        var userImages = returnUserImages(conn.u.user_image);
 
         // get user tags
-        var tags = app.db.getUserChains(u.user_id, function(err, results){
+        var tags = app.db.getUserChains(conn.u.user_id, function(err, results){
             chainObj = sortChainOptions(results);
             var menuHTML = jade.renderFile(menuPath, {chainTop: chainObj.top, chainList: chainObj.list});
-            s.emit('menu', {succces: (err == null), menu: menuHTML});
+            conn.s.emit('menu', {succces: (err == null), menu: menuHTML});
         });
 
     }
 
-    function saveTag(reqObj, extID){
-        var u = users[extID];
-        var s = sockets[extID];
-
+    function saveTag(reqObj, conn){
         reqObj.id = returnRandID(15); // tag ID
         reqObj.fid = returnRandID(15); // file ID
-        reqObj.uid = u.user_id;
-        reqObj.cid = u.default_chain_id;
+        reqObj.uid = conn.u.user_id;
+        reqObj.cid = conn.u.default_chain_id;
 
         app.db.saveTag(reqObj, function(err, result){
             console.log('addTagEntry', err);
-            s.emit('callback', {
+            conn.s.emit('callback', {
                 success: (err == null),
                 callbackID: reqObj.callbackID,
                 action: 'saved_tag',
@@ -102,13 +118,11 @@ module.exports = new function(){
         });
     }
 
-    function getPageTags(reqObj, extID){
-        var u = users[extID];
-        var s = sockets[extID];
+    function getPageTags(reqObj, conn){
         console.log('getPageTags');
-        app.db.getPageTags(u.user_id, reqObj.url, function(err, results){
+        app.db.getPageTags(conn.u.user_id, reqObj.url, function(err, results){
             console.log(err);
-            s.emit('callback', {
+            conn.s.emit('callback', {
                 success: (err == null),
                 callbackID: reqObj.callbackID,
                 action: 'page_tags',
@@ -118,10 +132,7 @@ module.exports = new function(){
     }
 
     // discussion contente
-    function getTagContent(reqObj, extID){
-        var u = users[extID];
-        var s = sockets[extID];
-
+    function getTagContent(reqObj, conn){
         var retObj = {success:false, callbackID: reqObj.callbackID, action: 'tag_content'};
 
         async.waterfall([
@@ -141,32 +152,27 @@ module.exports = new function(){
             }
         ], function(err, res){
             retObj.success = (err == null);
-            s.emit('callback', retObj)
+            conn.s.emit('callback', retObj)
         });
     }
 
     // discussion comment
-    function saveTagComment(req, extID){
-        var u = users[extID];
-        var s = sockets[extID];
+    function saveTagComment(req, conn){
         var ret = {success:false, callbackID: req.callbackID, action: 'save_tag_comment'};
         req.id = ret.id = returnRandID(15); // tag ID
-        req.user_id = u.user_id; // reset user id
+        req.user_id = conn.u.user_id; // reset user id
         app.db.saveTagComment(req, function(err, result){
             console.log('saveTagComment', result);
             ret.success = (err == null);
-            s.emit('callback', ret);
+            conn.s.emit('callback', ret);
         });
     }
 
-    function undoTag(reqObj, extID){
-        var u = users[extID];
-        var s = sockets[extID];
-
-        reqObj.uid = u.user_id;
+    function undoTag(reqObj, conn){
+        reqObj.uid = conn.u.user_id;
         app.db.deleteTag(reqObj, function(err, result){
             console.log('undoTag', err);
-            s.emit('callback', {
+            conn.s.emit('callback', {
                 success: (err == null),
                 callbackID: reqObj.callbackID,
                 id: reqObj.id
@@ -174,89 +180,99 @@ module.exports = new function(){
         })
     }
 
-    function deleteTag(req, extID){
-        var u = users[extID];
-        var s = sockets[extID];
+    function deleteTag(req, conn){
         req.success = false;
-        req.uid = u.user_id;
+        req.uid = conn.u.user_id;
         req.action = 'delete_discussion_tag';
         app.db.deleteTag(req, function(err, result){
             req.success = (err == null);
             console.log('deleteTag', err, req);
-            s.emit('callback', req);
+            conn.s.emit('callback', req);
         });
     }
 
-    function saveTagText(reqObj, extID){
-        var u = users[extID];
-        var s = sockets[extID];
-
+    function saveTagText(reqObj, conn){
         app.db.saveTagText(reqObj, function(err, result){
             console.log('saveTagText', err, reqObj);
-            s.emit('callback', {success:(err == null), callbackID: reqObj.callbackID, action: 'saved_tag_text'});
+            conn.s.emit('callback', {success:(err == null), callbackID: reqObj.callbackID, action: 'saved_tag_text'});
         });
     }
 
-    function saveTagChain(reqObj, extID){
-        var u = users[extID];
-        var s = sockets[extID];
-
+    function saveTagChain(reqObj, conn){
         app.db.updateTagChain(reqObj.tagID, reqObj.chainID, function(err, result){
             console.log('saveTagChain', err);
-            s.emit('callback', {success:(err == null), callbackID: reqObj.callbackID, action: 'saved_tag_chain'});
+            conn.s.emit('callback', {success:(err == null), callbackID: reqObj.callbackID, action: 'saved_tag_chain'});
 
             // sned a new chain
-            sendPulseMenu(null, extID);
+            sendPulseMenu(null, conn);
         });
     }
 
-    function saveNewChain(data, extID){
-        var u = users[extID];
-        var s = sockets[extID];
+    function saveNewChain(data, conn){
         var isDefault = false;
         var retObj = {callbackID: data.callbackID, action: 'saved_chain', success:true};
 
         app.db.saveNewChain(data.chainName, isDefault, function(err, result){
             console.log('save chain error', err);
-            if(err) return emitError(s, retObj, "DB error 1");
+            if(err) return emitError(conn.s, retObj, "DB error 1");
 
             // add user chain ...
             var chain = result.rows[0].chain_id;
-            app.db.saveUserChain(u.user_id, chain.chain_id, function(err2, result2){
-                if(err2) return emitError(s, retObj, "DB error 2");
+            app.db.saveUserChain(conn.u.user_id, chain.chain_id, function(err2, result2){
+                if(err2) return emitError(conn.s, retObj, "DB error 2");
                 retObj.chain = chain;
-                s.emit('callback', retObj);
+                conn.s.emit('callback', retObj);
             });
         });
     }
 
-    function deleteChain(data, extID){
-        var u = users[extID];
-        var s = sockets[extID];
+    function deleteChain(data, conn){
         console.log('delete chain', data);
         var retObj = {action: 'deleted_chain', callbackID: data.callbackID, success:true, chainID: data.chainID};
-        if(data.chainID == u.default_chain_id)
-            return emitError(s, retObj, 'Default chain can\'t be deleted');
+        if(data.chainID == conn.u.default_chain_id)
+            return emitError(conn.s, retObj, 'Default chain can\'t be deleted');
 
         app.db.deleteChain(data.chainID, function(err, result){
             console.log(err);
-            if(err) return emitError(s, retObj, "DB error");
-            s.emit('callback', retObj);
+            if(err) return emitError(conn.s, retObj, "DB error");
+            conn.s.emit('callback', retObj);
         });
     }
 
-    function saveTagImage(data, extID){
-        var u = users[extID];
-        var s = sockets[extID];
+    function saveTagImage(data, conn){
+        console.log('saveTagImage', data.imageType);
 
-        if(data.imageType != 'target' && data.imageType != 'generic' && data.imageType != 'meme')
+        // make sure it's one of these allowed types
+        var allowed = ['target', 'generic', 'meme', 'favicon'];
+        if(allowed.indexOf(data.imageType) == -1)
             return console.log('bad image type');
 
-        var fileName = data.fileID + '.' + data.ext;
+        // figure out the correct extension
+        var ext = 'png';
+        var imageTypeRegularExpression = /\/(.*?)$/;
+        var matches = data.dataURL.match(imageTypeRegularExpression);
+        if (matches.length == 3) ext = matches[1];
+
+        // file name and path...
+        var fileName = returnRandID(12) + '.' + ext;
         var savePath = path.resolve(__dirname, '../files', data.imageType, fileName);
         var imageBuffer = decodeBase64Image(data.dataURL);
 
+        // save the file
         fs.writeFile(savePath, imageBuffer.data, function(err) {
+            // if file saved successfully
+            if(!err){
+                // update database entry with file name
+                var saveObj = {table: 'tag', setField: 'image_' + data.imageType, setValue: fileName, whereField: 'tag_id', whereValue: data.tagID};
+
+                app.db.updateSingleFieled(saveObj, function(err, result){
+                    data.success = true;
+                    data.fileName = fileName;
+                    data.action = 'save_image';
+                });
+
+            }
+
             console.log('image_saved', err, app.moment().format("YYYY-MM-DD HH:mm:ss"));
         });
     }
@@ -264,13 +280,7 @@ module.exports = new function(){
     function emitError(s, o, m){
         o.success = false;
         o.message = m;
-        s.emit('callback', o);
-    }
-
-    this.sendAuthUpdate = function(extID, results){
-        var socket = sockets[extID];
-        users[extID] = results;
-        socket.emit('auth_status', results);
+        conn.s.emit('callback', o);
     }
 
     function sortChainOptions(chainArray){

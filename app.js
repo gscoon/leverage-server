@@ -17,7 +17,7 @@ app = {
     siteURL2: "http://localhost:" + config.port + '/',
     plaid_env: plaid.environments.tartan,
     mongoConnected: function(){},
-    io: require('./inc/socket_handle.js'), // handle sockets,
+    io: require('./inc/socket-handle.js'), // handle sockets,
     api: require('./inc/auth.js')
 }
 

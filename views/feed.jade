@@ -1,0 +1,31 @@
+doctype html
+html(lang="en")
+    head
+        title Chicken Feed
+        script(type='text/javascript', src='/js/jquery.js')
+        script(type='text/javascript', src='/js/feed.js')
+        link(rel='stylesheet', type='text/css', href='/css/style.css')
+        link(rel='stylesheet', type='text/css', href='/css/feed.css')
+    body
+        div#outer
+            div#header
+                img#logo
+                div#nav
+            div#content
+                each tag, index in tags
+                    div.feed_row(id="feed_row_#{tag.tag_id}")
+                        div.feed_row_title #{tag.thoughts}
+                        div.feed_row_img
+                            if(tag.image_favicon != null)
+                                img.feed_img_favicon(src="/files/favicon/#{tag.image_favicon}")
+                            if(tag.image_generic != null)
+                                img.feed_img_generic(src="/files/generic/#{tag.image_generic}")
+                            if(tag.image_target != null)
+                                img.feed_img_target(src="/files/target/#{tag.image_target}")
+                        div.feed_row_meta    
+                            span.feed_row_ts(data-feed-ts= "#{tag.timestamp}")
+                            |  | 
+                            a.feed_row_url(href="#{tag.url}") #{tag.formattedURL}
+                            //img(src="/files/target/#{tag.image_generic}")
+                            
+                            

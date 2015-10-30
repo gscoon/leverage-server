@@ -88,4 +88,11 @@ module.exports = function(express, expressapp){
         res.render('discussion', { title: 'Dre Day'});
     });
 
+    expressapp.get('/test', function(req, res, next){
+        res.render('test', { title: 'Dre Day'});
+    });
+
+    var feedHandle = require('./inc/feed-handle.js')(expressapp);
+    expressapp.get('/feed', feedHandle.displayFeed);
+    expressapp.get('/files/:fileType/:fileName', feedHandle.handleFileImages);
 }
