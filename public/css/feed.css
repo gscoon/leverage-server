@@ -7,8 +7,7 @@ body
 
 #outer
 {
-    margin:10px auto;
-    width:400px;
+    margin:10px 0 10px 50px;
 }
 
 #header
@@ -22,26 +21,45 @@ body
 
 #content
 {
-    border-radius: 5px;
-    border:1px solid #ccc;
-    background-color:#fff;
-    min-height:400px;
     padding:10px;
 }
 
 
 .feed_row
 {
-    padding:0 0 20px 0;
     margin:0 0 20px 0;
     font-family: 'Open Sans';
+}
+
+
+div.feed_row_left
+{
+    display: inline-block;
+    width:400px;
+    border-radius: 5px;
+    border:1px solid #ccc;
+    background-color:#fff;
+    position:relative;
+    padding:10px;
+    margin:0 10px 0 0;
+}
+
+div.feed_row_right
+{
+    display: inline-block;
+    width:400px;
+    vertical-align: top;
+    padding:10px;
 }
 
 .feed_row_title
 {
     font-size:13px;
     font-weight:bold;
-    padding:0 0 8px;
+    padding:0 0 0 25px;
+    margin:0 0 10px;
+    height:20px;
+    overflow: hidden;
 }
 
 div.feed_row_img
@@ -60,10 +78,10 @@ img.feed_img_target, img.feed_img_generic
 img.feed_img_favicon
 {
     position:absolute;
-    right:10px;
-    top:10px;
-    height:20px;
-    width:20px;
+    left:10px;
+    top:13px;
+    height:15px;
+    width:15px;
 }
 
 div.feed_row_meta
@@ -82,6 +100,15 @@ div.feed_row_ts
 }
 
 div.feed_row_url
+{
+}
+
+div.feed_usr_img
+{
+
+}
+
+.feed_row_op
 {
 
 }

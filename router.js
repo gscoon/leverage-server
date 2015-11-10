@@ -94,5 +94,5 @@ module.exports = function(express, expressapp){
 
     var feedHandle = require('./inc/feed-handle.js')(expressapp);
     expressapp.get('/feed', feedHandle.displayFeed);
-    expressapp.get('/files/:fileType/:fileName', feedHandle.handleFileImages);
+    expressapp.get('/files/:fileType/:fileName([a-zA-Z0-9\/\.]+)', feedHandle.handleFileImages);
 }

@@ -4,15 +4,15 @@ var dbClass = function(){
 
     this.getUserTags = function(t, callback){
         var limit = ('limit' in t)?t.limit:10;
-        var q = "SELECT * FROM tag WHERE user_id = $1 ORDER BY timestamp DESC LIMIT $2";
+        var q = "SELECT t.*, u.user_image FROM tag t JOIN puser u ON u.user_id = t.user_id WHERE t.user_id = $1 ORDER BY t.timestamp DESC LIMIT $2";
         var params = [t.uid, t.limit];
         pqQuery(q, params, callback);
     }
 
     this.saveTag = function(t, callback){
         var ts = app.moment().format("YYYY-MM-DD HH:mm:ss");
-        var q = "INSERT INTO tag (tag_id, file_id, user_id, chain_id, url, share_status, inner_text, thoughts, zoom, placement, family, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *";
-        var params = [t.id, t.fid, t.uid, t.cid, t.url, t.share, t.pulseText, t.thoughts, t.zoom, t.pulsePos, t.family, ts];
+        var q = "INSERT INTO tag (tag_id, file_id, user_id, chain_id, url, page_title, share_status, inner_text, thoughts, zoom, placement, family, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *";
+        var params = [t.id, t.fid, t.uid, t.cid, t.url, t.pageTitle, t.share, t.pulseText, t.thoughts, t.zoom, t.pulsePos, t.family, ts];
         pqQuery(q, params, callback);
     }
 
