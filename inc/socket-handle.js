@@ -29,6 +29,7 @@ module.exports = new function(){
             socket.on('save_tag_comment', socketListener.bind(saveTagComment));
             socket.on('delete_discussion_tag', socketListener.bind(deleteTag));
             socket.on('save_image', socketListener.bind(saveTagImage));
+            socket.on('get_feed', socketListener.bind(getFeed));
 
             function handleExtension(data){
                 conn.extID = data.extID;
@@ -96,7 +97,24 @@ module.exports = new function(){
             var menuHTML = jade.renderFile(menuPath, {chainTop: chainObj.top, chainList: chainObj.list});
             conn.s.emit('menu', {succces: (err == null), menu: menuHTML});
         });
+    }
 
+    function getFeed(reqObj, conn){
+        var feedPath = path.resolve(app.base, 'views/feed_content.jade');
+        // set user image
+        var userImages = returnUserImages(conn.u.user_image);
+        app.db.getUserTags({uid: conn.u.user_id, limit: 15}, function(err, tags){
+            // format the url
+            var r = /:\/\/(.[^/]+)/;
+            tags.forEach(function(tag, i){
+                var fURL = tag.url.match(r)[1];
+                if(fURL.indexOf('www.')== 0) fURL = fURL.substr(4);
+                tag.formattedURL = fURL;
+            })
+
+            var feedHTML = jade.renderFile(feedPath, {tags: tags});
+            conn.s.emit('callback', {success: true, action: 'feed', feed: feedHTML, callbackID: reqObj.callbackID});
+        });
     }
 
     function saveTag(reqObj, conn){

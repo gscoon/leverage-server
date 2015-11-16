@@ -4,7 +4,7 @@ var dbClass = function(){
 
     this.getUserTags = function(t, callback){
         var limit = ('limit' in t)?t.limit:10;
-        var q = "SELECT t.*, u.user_image FROM tag t JOIN puser u ON u.user_id = t.user_id WHERE t.user_id = $1 ORDER BY t.timestamp DESC LIMIT $2";
+        var q = "SELECT t.*, u.user_image, u.name as user_name FROM tag t JOIN puser u ON u.user_id = t.user_id WHERE t.user_id = $1 ORDER BY t.timestamp DESC LIMIT $2";
         var params = [t.uid, t.limit];
         pqQuery(q, params, callback);
     }

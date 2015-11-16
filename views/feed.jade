@@ -7,29 +7,3 @@ html(lang="en")
         link(rel='stylesheet', type='text/css', href='/css/style.css')
         link(rel='stylesheet', type='text/css', href='/css/feed.css')
     body
-        div#outer
-            div#header
-                img#logo
-                div#nav
-            div#content
-                each tag, index in tags
-                    div.feed_row(id="feed_row_#{tag.tag_id}")
-                        div.feed_row_left
-                            div.feed_row_title #{tag.page_title}
-                            if(tag.image_favicon != null)
-                                img.feed_img_favicon(src="/files/favicon/#{tag.image_favicon}")
-                            div.feed_row_img
-                                if(tag.image_generic != null)
-                                    img.feed_img_generic(src="/files/generic/#{tag.image_generic}")
-                                if(tag.image_target != null)
-                                    img.feed_img_target(src="/files/target/#{tag.image_target}")
-                            div.feed_row_meta    
-                                span.feed_row_ts(data-feed-ts= "#{tag.timestamp}")
-                                |  | 
-                                a.feed_row_url(href="#{tag.url}") #{tag.formattedURL}
-                                //img(src="/files/target/#{tag.image_generic}")
-                        div.feed_row_right
-                            img.feed_usr_img(src="/files/user/small/#{tag.user_image.small}")
-                            div.feed_row_op #{tag.thoughts}
-                            
-                            

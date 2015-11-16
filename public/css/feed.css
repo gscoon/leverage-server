@@ -35,13 +35,13 @@ body
 div.feed_row_left
 {
     display: inline-block;
-    width:400px;
+    width:300px;
     border-radius: 5px;
-    border:1px solid #ccc;
     background-color:#fff;
     position:relative;
-    padding:10px;
-    margin:0 10px 0 0;
+    padding:10px 0;
+    margin:0 20px 0 0;
+    box-shadow:0px 0px 8px 0px rgba(0,0,0,0.25);
 }
 
 div.feed_row_right
@@ -55,8 +55,7 @@ div.feed_row_right
 .feed_row_title
 {
     font-size:13px;
-    font-weight:bold;
-    padding:0 0 0 25px;
+    padding:0 10px ;
     margin:0 0 10px;
     height:20px;
     overflow: hidden;
@@ -78,7 +77,7 @@ img.feed_img_target, img.feed_img_generic
 img.feed_img_favicon
 {
     position:absolute;
-    left:10px;
+    left:-30px;
     top:13px;
     height:15px;
     width:15px;
@@ -86,12 +85,16 @@ img.feed_img_favicon
 
 div.feed_row_meta
 {
-    margin:5px 0 0;
-    padding:5px 0 0;
-    border:#efefef solid;
-    border-width:1px 0 0;
+    margin:0;
+    padding:10px 10px 0;
     color:#999;
     font-size:13px;
+}
+
+div.feed_row_meta a
+{
+    color:#386e85;
+    text-decoration: none;
 }
 
 div.feed_row_ts
@@ -103,12 +106,75 @@ div.feed_row_url
 {
 }
 
-div.feed_usr_img
+.feed_comment_row
+{
+    position:relative;
+    padding:0 0 0 35px;
+}
+
+
+.feed_op
+{
+    padding-bottom:10px;
+    margin:0 0 10px;
+    border:#ccc solid;
+    border-width:0 0 1px;
+}
+
+.feed_comment_user_img
+{
+    position:absolute;
+    left:0;
+    top:0;
+}
+
+.feed_comment
+{
+}
+
+.feed_comment_user
+{
+    font-size:13px;
+    font-weight:bold;
+    padding:0 5px 0 0;
+}
+
+.feed_comment_thoughts
+{
+    font-size:13px;
+    color:#444;
+}
+
+.feed_row_op_thoughts
 {
 
 }
 
-.feed_row_op
+.feed_comment_ts
 {
+    color:#666;
+    font-size:12px;
+}
 
+.feed_response
+{
+    position:relative;
+    padding:0;
+}
+
+input.feed_response_input
+{
+    background-color:#fff;
+    border:1px solid #ccc;
+    font-size:13px;
+    padding:4px 3px 4px 35px;
+    height:22px;
+    width:300px;
+}
+
+.feed_response_input_img
+{
+    position:absolute;
+    left:3px;
+    top:3px;
 }
