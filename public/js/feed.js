@@ -5,8 +5,8 @@ var chickenFeed = new function(){
         $('.feed_row').each(function(i, row){
             var feedTitle = $(row).find('.feed_title').text();
             console.log(feedTitle);
-            updateTimeSince();
         })
+        updateTimeSince();
     }
 
     function updateTimeSince() {

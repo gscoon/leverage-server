@@ -2,11 +2,13 @@ div#outer
     div#header
         img#logo
         div#nav
+            a#active_nav Feed
+            a Edit Chains
     div#content
         each tag, index in tags
             div.feed_row(id="feed_row_#{tag.tag_id}")
-                div.feed_row_left
-                    div.feed_row_title #{tag.page_title}
+                div.feed_row_top
+                    a.feed_row_title(href="#{tag.url}", target="_blank") #{tag.page_title}
                     if(tag.image_favicon != null)
                         img.feed_img_favicon(src="/files/favicon/#{tag.image_favicon}")
                     div.feed_row_img
@@ -14,18 +16,21 @@ div#outer
                             img.feed_img_generic(src="/files/generic/#{tag.image_generic}")
                         if(tag.image_target != null)
                             img.feed_img_target(src="/files/target/#{tag.image_target}")
-                    div.feed_row_meta    
+                    div.feed_row_meta
+                        a.feed_row_url(href="#{tag.url}", target="_blank") #{tag.formattedURL}
+                        span Posted:  
                         span.feed_row_ts(data-pulse-ts= "#{tag.timestamp}")
-                        |  | 
-                        a.feed_row_url(href="#{tag.url}") #{tag.formattedURL}
+
+
                         //img(src="/files/target/#{tag.image_generic}")
-                div.feed_row_right
+                div.feed_row_bottom
                     div.feed_op.feed_comment_row
                         img.feed_comment_user_img(src="/files/user/small/#{tag.user_image.small}")
                         div.feed_comment
-                            span.feed_comment_user #{tag.user_name}
+                            span.feed_comment_user #{tag.user_name}:
                             span.feed_comment_thoughts #{tag.thoughts}
                         div.feed_comment_ts(data-pulse-ts= "#{tag.timestamp}")
+                    div.feed_comment_section
                     div.feed_response
                         input.feed_response_input(placeholder="Respond...")
                         img.feed_response_input_img

@@ -1,0 +1,90 @@
+Started listening on port: 1111
+reconnection, extID:  eXtObJQGVuUVEJY
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+connection variables set up
+socket listener extID:  eXtObJQGVuUVEJY
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+socket listener extID:  eXtObJQGVuUVEJY
+sendPulseMenu
+[0mGET /feed [36m304 [0m232.412 ms - -[0m
+[0mGET /js/jquery.js [36m304 [0m5.337 ms - -[0m
+[0mGET /js/feed.js [36m304 [0m4.663 ms - -[0m
+[0mGET /css/style.css [36m304 [0m1.284 ms - -[0m
+[0mGET /css/feed.css [36m304 [0m1.503 ms - -[0m
+socket listener extID:  eXtObJQGVuUVEJY
+socket listener extID:  eXtObJQGVuUVEJY
+getPageTags
+null
+[0mGET /files/favicon/0l33SfErNob9.png [36m304 [0m88.241 ms - -[0m
+[0mGET /files/user/small/g.png [36m304 [0m125.472 ms - -[0m
+[0mGET /files/target/BZ0yxVHIETiX.png [36m304 [0m146.715 ms - -[0m
+[0mGET /files/favicon/bEGyKii3APb2.png [36m304 [0m170.181 ms - -[0m
+[0mGET /files/generic/VrN4YI61b0sF.png [36m304 [0m185.884 ms - -[0m
+[0mGET /files/generic/wvZvd9ctTXBe.png [36m304 [0m116.293 ms - -[0m
+[0mGET /files/favicon/61XNtYvFEhDe.png [36m304 [0m233.487 ms - -[0m
+[0mGET /files/target/dD95d2jlhE8l.png [36m304 [0m138.913 ms - -[0m
+[0mGET /files/favicon/5G48SGWbge33.png [36m304 [0m114.389 ms - -[0m
+[0mGET /files/generic/AQHAP11OzU1O.png [36m304 [0m118.311 ms - -[0m
+[0mGET /files/favicon/wx9Krx4xp2xS.png [36m304 [0m109.353 ms - -[0m
+[0mGET /files/target/1nvDtUjQLmG7.png [36m304 [0m91.112 ms - -[0m
+[0mGET /files/favicon/yH9W523w8uuO.png [36m304 [0m93.073 ms - -[0m
+[0mGET /files/generic/5Zs47Tg3CTWT.png [36m304 [0m154.629 ms - -[0m
+[0mGET /files/generic/6FBuV3k0An1z.png [36m304 [0m114.700 ms - -[0m
+[0mGET /files/target/RCc93CXTDyiW.png [36m304 [0m104.813 ms - -[0m
+[0mGET /files/favicon/mrEyYs7GQzW3.png [36m304 [0m112.906 ms - -[0m
+[0mGET /files/generic/BQEcrL9vQqhj.png [36m304 [0m113.725 ms - -[0m
+[0mGET /files/target/yWqKRMeYTftl.png [36m304 [0m291.025 ms - -[0m
+[0mGET /files/favicon/qSL39yZUbnFU.png [36m304 [0m129.019 ms - -[0m
+[0mGET /files/favicon/D3HBaMtkFZ2W.png [36m304 [0m104.138 ms - -[0m
+[0mGET /files/target/cDjw2pyTd1Nf.png [36m304 [0m102.228 ms - -[0m
+[0mGET /files/target/ynheEjT2dJAV.png [36m304 [0m172.569 ms - -[0m
+[0mGET /files/favicon/cxvfLg8mOtNP.png [36m304 [0m128.173 ms - -[0m
+[0mGET /files/generic/hyYlEoUVqO3r.png [36m304 [0m124.277 ms - -[0m
+[0mGET /files/favicon/JDCVrxOP4FFX.png [36m304 [0m110.252 ms - -[0m
+[0mGET /files/favicon/tztvWpzsVpOn.png [36m304 [0m108.090 ms - -[0m
+[0mGET /files/generic/dZIqZJeIB1UM.png [36m304 [0m104.392 ms - -[0m
+[0mGET /files/target/tNe6dpQl0NAc.png [36m304 [0m194.858 ms - -[0m
+[0mGET /files/favicon/8TpvTxd6Qlxj.png [36m304 [0m127.434 ms - -[0m
+[0mGET /files/generic/o5gPrdVrlQK6.png [36m304 [0m125.855 ms - -[0m
+[0mGET /files/favicon/dtNkqjMMRvtQ.png [36m304 [0m106.442 ms - -[0m
+[0mGET /files/target/NnoOu10tXPgu.png [36m304 [0m223.863 ms - -[0m
+[0mGET /files/generic/L5JmGwdSKxpi.png [36m304 [0m148.959 ms - -[0m
+[0mGET /files/target/nNhIBAtwTWk2.png [36m304 [0m132.842 ms - -[0m
+[0mGET /files/target/0BJ9rWMfle5g.png [36m304 [0m243.399 ms - -[0m

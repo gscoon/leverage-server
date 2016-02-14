@@ -31,6 +31,8 @@ module.exports = new function(){
             socket.on('save_image', socketListener.bind(saveTagImage));
             socket.on('get_feed', socketListener.bind(getFeed));
 
+            // after connection established, the extension sends a checked
+            // the check is supposed to get extension-user details
             function handleExtension(data){
                 conn.extID = data.extID;
                 sockets[conn.extID] = socket;
@@ -43,6 +45,8 @@ module.exports = new function(){
 
                     ret.success = true;
                     ret.user = results[0];
+                    
+                    console.log('user', ret.user);
                     ret.user.images = returnUserImages(ret.user.user_image);
 
                     users[conn.extID] = ret.user;
@@ -51,6 +55,7 @@ module.exports = new function(){
                         ret.user.chains = setArrayIndex(chains, 'chain_id');
                         socket.emit('user', ret);
                     });
+
                     console.log('connection variables set up');
                     if(conn.waitingFuncs.length > 0){
                         conn.waitingFuncs.forEach(function(f, i){
@@ -76,7 +81,7 @@ module.exports = new function(){
                 console.log('socket listener', 'extID: ', data.extID);
 
                 var me = {ext: conn.extID, u: users[conn.extID], s: sockets[conn.extID]}
-
+                console.log('me', me.u);
                 func(data, me);
             }
 

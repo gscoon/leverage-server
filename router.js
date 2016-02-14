@@ -61,10 +61,6 @@ module.exports = function(express, expressapp){
         res.sendFile(path.join(__dirname + '/views/signup.html'));
     });
 
-    var plaidProcess = require('./inc/plaid-process.js');
-    expressapp.get('/plaid_process', plaidProcess.handleGet.bind(plaidProcess));
-    expressapp.post('/plaid_process', plaidProcess.handlePost.bind(plaidProcess));
-
     expressapp.get('/auth/google', passport.authenticate('google', {scope: app.api.goog.scope}));
     //['https://mail.google.com/, https://www.google.com/m8/feeds, https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile']
 

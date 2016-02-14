@@ -1,4 +1,3 @@
-var plaid = require('plaid');
 var express = require('express');
 var expressapp = express();
 var server = require('http').createServer(expressapp);
@@ -15,7 +14,6 @@ app = {
     port: config.port,
     siteURL: "http://127.0.0.1:" + config.port + '/',
     siteURL2: "http://localhost:" + config.port + '/',
-    plaid_env: plaid.environments.tartan,
     mongoConnected: function(){},
     io: require('./inc/socket-handle.js'), // handle sockets,
     api: require('./inc/auth.js')
@@ -24,6 +22,8 @@ app = {
 app.db = require('./inc/db.js');
 
 require('./router')(express, expressapp);
+
+app.db.test(0);
 
 server.listen(app.port, function(){
     app.io.start(io);

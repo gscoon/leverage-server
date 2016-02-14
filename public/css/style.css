@@ -1,0 +1,51 @@
+body
+{
+    background-color:#fff;
+    padding:0;
+    margin:0;
+}
+
+
+#outer
+{
+    margin:10px auto;
+    width:325px;
+}
+
+#header
+{
+    border:#ccc dotted;
+    border-width:0 0 1px;
+    margin:0 0 20px;
+    padding:0 0 10px;
+    font-family: 'Open Sans';
+}
+
+#logo
+{
+    position:absolute;
+}
+
+#nav
+{
+
+}
+
+#nav a
+{
+    display: inline-block;
+    margin:0 10px 0 0;
+    padding:3px 6px;
+    text-align: center;
+    font-size:13px;
+}
+
+a#active_nav
+{
+    color:#773461;
+}
+
+#content
+{
+    padding:10px;
+}
