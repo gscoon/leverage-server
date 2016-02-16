@@ -45,16 +45,18 @@ module.exports = new function(){
 
                     ret.success = true;
                     ret.user = results[0];
-                    
-                    console.log('user', ret.user);
+
                     ret.user.images = returnUserImages(ret.user.user_image);
 
                     users[conn.extID] = ret.user;
-                    app.db.getUserChains(ret.user.user_id, function(err, chains){
-                        // change the array index from 0,1,... to the chain id
-                        ret.user.chains = setArrayIndex(chains, 'chain_id');
-                        socket.emit('user', ret);
-                    });
+
+                    ret.user.chains = [];
+                    socket.emit('user', ret);
+                    // app.db.getUserChains(ret.user.user_id, function(err, chains){
+                    //     // change the array index from 0,1,... to the chain id
+                    //     ret.user.chains = setArrayIndex(chains, 'chain_id');
+                    //     socket.emit('user', ret);
+                    // });
 
                     console.log('connection variables set up');
                     if(conn.waitingFuncs.length > 0){
@@ -81,7 +83,7 @@ module.exports = new function(){
                 console.log('socket listener', 'extID: ', data.extID);
 
                 var me = {ext: conn.extID, u: users[conn.extID], s: sockets[conn.extID]}
-                console.log('me', me.u);
+                //console.log('me', me.u);
                 func(data, me);
             }
 
@@ -98,6 +100,7 @@ module.exports = new function(){
 
         // get user tags
         var tags = app.db.getUserChains(conn.u.user_id, function(err, results){
+            console.log(err, results);
             chainObj = sortChainOptions(results);
             var menuHTML = jade.renderFile(menuPath, {chainTop: chainObj.top, chainList: chainObj.list});
             conn.s.emit('menu', {succces: (err == null), menu: menuHTML});
@@ -119,6 +122,7 @@ module.exports = new function(){
 
             var feedHTML = jade.renderFile(feedPath, {tags: tags});
             conn.s.emit('callback', {success: true, action: 'feed', feed: feedHTML, callbackID: reqObj.callbackID});
+
         });
     }
 
@@ -223,10 +227,9 @@ module.exports = new function(){
 
     function saveTagChain(reqObj, conn){
         app.db.updateTagChain(reqObj.tagID, reqObj.chainID, function(err, result){
-            console.log('saveTagChain', err);
             conn.s.emit('callback', {success:(err == null), callbackID: reqObj.callbackID, action: 'saved_tag_chain'});
 
-            // sned a new chain
+            // send a new chain
             sendPulseMenu(null, conn);
         });
     }
@@ -308,6 +311,7 @@ module.exports = new function(){
 
     function sortChainOptions(chainArray){
         var str = JSON.stringify(chainArray);
+        console.log(chainArray, str);
         var topOptions = JSON.parse(str);
         var listOptions = JSON.parse(str);
 
@@ -358,6 +362,8 @@ module.exports = new function(){
     }
 
     function returnUserImages(ui){
+        if(typeof ui == 'string')
+            ui = JSON.parse(ui);
         var miniImgSrc = path.resolve(app.base, "files/user/small/", ui.small);
         var largeImgSrc = path.resolve(app.base, "files/user/large/", ui.large);
         return {small: imageToBase64(miniImgSrc), large: imageToBase64(largeImgSrc)};

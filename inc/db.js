@@ -77,7 +77,7 @@ var dbClass = function(){
 
     this.getUserChains = function(uid, callback){
         var q = "SELECT c.*, cc.ccount FROM puser_chain pc JOIN chain c ON c.chain_id = pc.chain_id LEFT JOIN (SELECT chain_id, count(chain_id) as ccount FROM tag WHERE user_id = ? GROUP BY chain_id) cc ON cc.chain_id = c.chain_id  WHERE pc.user_id = ?";
-        var params = [uid];
+        var params = [uid, uid];
         runQuery(q, params, callback);
     }
 
