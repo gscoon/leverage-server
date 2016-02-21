@@ -58,7 +58,7 @@ module.exports = new function(){
                     //     socket.emit('user', ret);
                     // });
 
-                    console.log('connection variables set up');
+                    console.log('Socket connection variables set up');
                     if(conn.waitingFuncs.length > 0){
                         conn.waitingFuncs.forEach(function(f, i){
                             if(f != null){

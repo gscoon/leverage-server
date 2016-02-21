@@ -23,8 +23,6 @@ app.db = require('./inc/db.js');
 
 require('./router')(express, expressapp);
 
-app.db.test(0);
-
 server.listen(app.port, function(){
     app.io.start(io);
     console.log('Started listening on port: ' + app.port);

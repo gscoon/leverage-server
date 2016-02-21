@@ -1,9 +1,21 @@
-var pg = require('pg');
 var mysql = require('mysql');
 
 var dbClass = function(){
-
-    this.conn = mysql.createConnection(config.db);
+	var conn;
+	
+	startConnection();
+	
+	function startConnection(){
+		conn = mysql.createConnection(config.db);
+		
+		conn.on('error', function(err) {
+			console.log('db error', err);
+			// Connection to the MySQL server is usually lost due to either 
+			//server restart, or a connnection idle timeout
+			if(err.code === 'PROTOCOL_CONNECTION_LOST')
+				  startConnection();                         
+		})
+	}
 
     this.test = function(id){
         var q = "SELECT * FROM test WHERE id = ?";
@@ -26,6 +38,19 @@ var dbClass = function(){
         var params = [t.id, t.fid, t.uid, t.cid, t.url, t.pageTitle, t.share, t.pulseText, t.thoughts, t.zoom, t.pulsePos, t.family, ts];
         runQuery(q, params, callback);
     }
+	
+	this.saveSpot = function(s, callback){
+		var ts = app.moment().format("YYYY-MM-DD HH:mm:ss");
+		var q = "INSERT INTO spot (spot_id, spot_json, user_id, timestamp) VALUES (?, ?, ?, ?)";
+		var params = [s.id, JSON.stringify(s.spot), s.uid, ts];
+		runQuery(q, params, callback);
+	}
+	
+	this.getSpot = function(id, callback){
+		var q = "SELECT * FROM spot WHERE spot_id = ?";
+		var params = [id];
+		runQuery(q, params, callback);
+	}
 
     this.getTagDetails = function(tid, callback){
         var q = "SELECT t.*, u.name, u.user_image, c.name as chain_name FROM tag t JOIN puser u ON u.user_id = t.user_id JOIN chain c ON c.chain_id = t.chain_id WHERE t.tag_id = ?";
@@ -128,7 +153,7 @@ var dbClass = function(){
 
 
     function runQuery(q, params, callback){
-        app.db.conn.query(q, params, callback);
+        conn.query(q, params, callback);
     }
 
 

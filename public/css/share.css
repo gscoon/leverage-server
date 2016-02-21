@@ -1,0 +1,171 @@
+@import url(http://fonts.googleapis.com/css?family=Neucha);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,200,300,400,700);
+
+body, html
+{
+    margin:0;
+    padding:0;
+	background-color:#efefef;
+	box-sizing: border-box;
+	font-family: 'Open Sans';
+}
+
+*, *:before, *:after 
+{
+	box-sizing: inherit;
+}
+
+#header
+{
+	padding:10px 0;
+	border:#ccc solid;
+	border-width:0 0 1px;
+}
+
+body
+{
+	padding:0 420px 0 10px;
+}
+
+#outer
+{
+	min-width:400px;
+	max-width:800px;
+	margin:0 auto;
+	position:relative;
+}
+
+#preview_container
+{
+    position:relative;
+	background-color:#fff;
+	border:#ccc solid 1px;
+	border-radius:5px;
+	padding:10px;
+	box-sizing:content-box;
+	overflow:hidden;
+}
+
+.preview_img
+{
+	max-width:700px;
+}
+
+#original_post
+{
+	margin:15px 0 10px;
+	padding:0 10px 0 65px;
+	position:relative;
+}
+
+#op_poster
+{
+	font-size:12px;
+	color:#333;
+	padding:0;
+	font-weight:bold;
+}
+
+#op_text
+{
+    color:#89252F;
+    /*font-family: Neucha;*/
+    font-size:16px;
+	padding:0;
+}
+
+#op_timestamp
+{
+	color:#666;
+	font-size:12px;
+}
+
+#op_poster_img
+{
+	position:absolute;
+	width:50px;
+	left:0;
+	top:0;
+	border-radius:4px;
+}
+
+#post_url
+{
+	position:relative;
+	overflow: hidden;              /* "overflow" value must be different from  visible"*/ 
+    -o-text-overflow: ellipsis;    /* Opera < 11*/
+    text-overflow:    ellipsis; 
+	height:20px;
+	margin:0 0 10px;
+	padding:0 0 0 25px;
+	vertical-align:top;
+}
+
+#post_url a
+{
+	vertical-align:top;
+}
+
+#post_url a:hover
+{
+	color:#0c5573;
+}
+
+#post_favicon
+{
+	position:absolute;
+	left:0;
+	top:0;
+	width:16px;
+	height:16px;
+}
+
+#post_logo
+{
+	position:absolute;
+	
+}
+
+#post_url a
+{
+	color:#999;
+	font-size:11px;
+	text-decoration:none;
+}
+
+#comment_container
+{
+	position:fixed;
+	right:0;
+	top:0;
+	width:400px;
+	height:100%;
+	background-color:#fff;
+	box-shadow:0px -3px 5px #999;
+	padding:0 0 0 5px;
+	z-index:300;
+}
+
+div.pulse_set_bar, div.pulse_set_circle
+{
+    height:30px;
+    background-color:#780808;
+    position:absolute;
+    z-index:200;
+    margin:0; !important;
+    padding-bottom:0; !important;
+}
+
+.pulse_set_bar
+{
+    opacity:.1;
+    left:-2000px;
+    width:4000px;
+}
+
+.pulse_set_circle
+{
+    width:30px;
+    border-radius: 50%;
+    opacity:.4;
+}

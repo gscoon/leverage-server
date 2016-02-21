@@ -2,31 +2,23 @@ var path = require("path");
 var bodyParser = require("body-parser");
 var cookieParser = require("cookie-parser");
 var expressSession  = require("express-session");
-var methodOverride = require("method-override");
+var SessionStore = require('express-mysql-session');
 var passport = require('passport');
 var logger = require('morgan');
-var pg = require('pg');
+var subdomain = require('express-subdomain');
 
 module.exports = function(express, expressapp){
-
-    var process = require('./inc/process.js')(expressapp);
-
     expressapp.set('port', app.port);
     expressapp.set('view engine', 'jade');
     expressapp.use(logger('dev'));
     expressapp.use(express.static('public'));
     expressapp.use(cookieParser());
     expressapp.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
-
-    //var MongoStore = require('connect-mongo')(expressSession );
-    pgSession = require('connect-pg-simple')(expressSession);
+	
 
     expressapp.use(expressSession({
-        secret: 'keyboard cat',
-        store: new pgSession({
-            conString : config.pgDB.connStr,
-            pg : pg
-        }),
+        secret: 'pox-cookie',
+        store: new SessionStore(config.db),
         resave: true,
         saveUninitialized: true,
         cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
@@ -56,39 +48,60 @@ module.exports = function(express, expressapp){
              done(null, user);
         });
     });
+	
+	var shareRouter = express.Router();
+	var mainRouter = express.Router();
+	var imageRouter = express.Router();
+	
+	mainRouter.get('/', function(req, res){
+		res.send('You made it to chicken pox!')
+	})
+	
+	var share = require('./inc/share-handler.js');
+	shareRouter.get('/:id([0-9a-zA-Z]{1,10})', share.displayView)
+	
+	// handle image requests
+	var imageCatch = '/:type([a-zA-Z]{1,20})/:id([a-zA-Z0-9]{1,25})\.:ext([a-zA-Z]{3,4})';
+	imageRouter.get(imageCatch, share.displayImage);
+	mainRouter.get('/images'+imageCatch, share.displayImage)
+	
+	// handle process requests
+	mainRouter.all('/share-process', share.processRequest);
+	
+	expressapp.use(subdomain('share', shareRouter)); // share subdomain
+	expressapp.use(subdomain('image', imageRouter)); // image subdomain
+	expressapp.use(mainRouter);
+	
+	
+	// --------------------
 
-    expressapp.get('/', function(req, res, next){
-        res.sendFile(path.join(__dirname + '/views/signup.html'));
-    });
+    // expressapp.get('/auth/google', passport.authenticate('google', {scope: app.api.goog.scope}));
+    // ['https://mail.google.com/, https://www.google.com/m8/feeds, https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile']
 
-    expressapp.get('/auth/google', passport.authenticate('google', {scope: app.api.goog.scope}));
-    //['https://mail.google.com/, https://www.google.com/m8/feeds, https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile']
+    // expressapp.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), app.api.goog.authFinish);
 
-    expressapp.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), app.api.goog.authFinish);
+    // expressapp.get('/gmail', app.api.goog.getEmails.bind(app.api.goog));
 
-    expressapp.get('/gmail', app.api.goog.getEmails.bind(app.api.goog));
+    // expressapp.get('/session_test', function(req, res, next){
+        // res.send(req.session);
+        // next();
+    // });
 
-    expressapp.get('/session_test', function(req, res, next){
-        res.send(req.session);
-        next();
-    });
+    // expressapp.get('/auth/pre-fb', app.api.fb.setExtension.bind(app.api.fb));
+    // expressapp.get('/auth/fb', passport.authenticate('facebook',{scope: app.api.fb.scope}));
+    // expressapp.get('/auth/fb/callback', passport.authenticate('facebook'), app.api.fb.authFinalCallback);
 
-    expressapp.get('/auth/pre-fb', app.api.fb.setExtension.bind(app.api.fb));
-    expressapp.get('/auth/fb', passport.authenticate('facebook',{scope: app.api.fb.scope}));
-    expressapp.get('/auth/fb/callback', passport.authenticate('facebook'), app.api.fb.authFinalCallback);
+    
 
-    // testing testing 1 2 3
-    expressapp.all('/process', process.handleRequest.bind(process));
+    // expressapp.get('/disc', function(req, res, next){
+        // res.render('discussion', { title: 'Dre Day'});
+    // });
 
-    expressapp.get('/disc', function(req, res, next){
-        res.render('discussion', { title: 'Dre Day'});
-    });
+    // expressapp.get('/test', function(req, res, next){
+        // res.render('test', { title: 'Dre Day'});
+    // });
 
-    expressapp.get('/test', function(req, res, next){
-        res.render('test', { title: 'Dre Day'});
-    });
-
-    var feedHandle = require('./inc/feed-handle.js')(expressapp);
-    expressapp.get('/feed', feedHandle.displayFeed);
-    expressapp.get('/files/:fileType/:fileName([a-zA-Z0-9\/\.]+)', feedHandle.handleFileImages);
+    // var feedHandle = require('./inc/feed-handler.js')(expressapp);
+    // expressapp.get('/feed', feedHandle.displayFeed);
+    // expressapp.get('/files/:fileType/:fileName([a-zA-Z0-9\/\.]+)', feedHandle.handleFileImages);
 }

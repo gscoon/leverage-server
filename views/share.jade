@@ -1,0 +1,32 @@
+doctype html
+html(lang="en")
+	head
+		title #{title} - Chicken Pox
+		script(type='text/javascript', src='/js/jquery.js')
+		script(type='text/javascript', src='/js/share.js')
+		script(type='text/javascript', src='/js/util.js')
+		script(type='text/javascript', src='/js/moment.min.js')
+		script(type='text/javascript', src='/js/jPulse.js')
+		script(type="text/javascript").
+			 var spot = !{JSON.stringify(spot)}
+		link(rel='stylesheet', type='text/css', href='/css/share.css')
+		link(rel="icon",href="/images/favicons/favicon-32x32.png")
+	body
+		
+		include fb-comment.html
+		div#outer
+			div#header
+				div#logo
+					a(href="http://chickenpox.io")
+						img(src="/images/logo.png")
+			div#original_post
+				div#op_poster
+				div#op_text
+				div#op_timestamp
+				img#op_poster_img
+			div#post_url
+				img#post_favicon
+				a
+			div#preview_container
+		div#comment_container
+			div.fb-comments(data-numposts="5", data-href=href, width="400")
