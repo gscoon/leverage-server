@@ -54,7 +54,7 @@ module.exports = function(express, expressapp){
 	var imageRouter = express.Router();
 	
 	mainRouter.get('/', function(req, res){
-		res.send('You made it to chicken pox!')
+		res.render('home');
 	})
 	
 	var share = require('./inc/share-handler.js');
@@ -67,6 +67,7 @@ module.exports = function(express, expressapp){
 	
 	// handle process requests
 	mainRouter.all('/share-process', share.processRequest);
+	mainRouter.get('/test', share.test);
 	
 	expressapp.use(subdomain('share', shareRouter)); // share subdomain
 	expressapp.use(subdomain('image', imageRouter)); // image subdomain
@@ -74,23 +75,6 @@ module.exports = function(express, expressapp){
 	
 	
 	// --------------------
-
-    // expressapp.get('/auth/google', passport.authenticate('google', {scope: app.api.goog.scope}));
-    // ['https://mail.google.com/, https://www.google.com/m8/feeds, https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile']
-
-    // expressapp.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), app.api.goog.authFinish);
-
-    // expressapp.get('/gmail', app.api.goog.getEmails.bind(app.api.goog));
-
-    // expressapp.get('/session_test', function(req, res, next){
-        // res.send(req.session);
-        // next();
-    // });
-
-    // expressapp.get('/auth/pre-fb', app.api.fb.setExtension.bind(app.api.fb));
-    // expressapp.get('/auth/fb', passport.authenticate('facebook',{scope: app.api.fb.scope}));
-    // expressapp.get('/auth/fb/callback', passport.authenticate('facebook'), app.api.fb.authFinalCallback);
-
     
 
     // expressapp.get('/disc', function(req, res, next){

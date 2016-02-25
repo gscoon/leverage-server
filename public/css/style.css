@@ -1,51 +1,75 @@
-body
-{
-    background-color:#fff;
+@import url(http://fonts.googleapis.com/css?family=Neucha);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,200,300,400,700);
+@import url(https://fonts.googleapis.com/css?family=PT+Sans);
+
+html, body{
+	background-image:url('../images/swirl_pattern.png');
+	font-family: 'Open Sans';
+	background-color:#fff;
     padding:0;
     margin:0;
+	box-sizing: border-box;
 }
 
-
-#outer
+*, *:before, *:after 
 {
-    margin:10px auto;
-    width:325px;
+	box-sizing: inherit;
 }
 
-#header
+#top
 {
-    border:#ccc dotted;
-    border-width:0 0 1px;
-    margin:0 0 20px;
-    padding:0 0 10px;
-    font-family: 'Open Sans';
+	width:800px;
+	margin:0 auto;
+	padding:15px 0 0;
 }
 
 #logo
 {
-    position:absolute;
 }
 
-#nav
-{
 
+#tag_line
+{
+	text-align:center;
+	margin:60px 0 30px;
 }
 
-#nav a
+#tag_line h1
 {
-    display: inline-block;
-    margin:0 10px 0 0;
-    padding:3px 6px;
-    text-align: center;
-    font-size:13px;
+	font-size:22px;
+	color:#444;
+	padding:0;
+	margin:0;
+	font-weight:normal;
+	font-family:'PT Sans';
 }
 
-a#active_nav
+#search
 {
-    color:#773461;
+	text-align:center;
+	position:relative;
 }
 
-#content
+#search_loader
 {
-    padding:10px;
+	background-image:url("/images/search-loader.gif");
+	width:128px;
+	height:15px;
+	position:absolute;
+	left:50%;
+	top: 24px;
+	margin:-8px 0 0 -64px;
+	display:none;
+}
+
+#url-input
+{
+	border-radius: 6px;
+    height: 46px;
+    width: 600px;
+    border: solid 1px #bbb;
+    margin: 0 auto;
+    padding: 10px;
+    color: #444;
+    font-size: 15px;
 }
