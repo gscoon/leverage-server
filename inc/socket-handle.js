@@ -15,7 +15,7 @@ module.exports = new function(){
 
         io.on('connection', function (socket) {
             var conn = {extID: null, waitingFuncs: [], searchAttempt: 0};
-
+			
             socket.on('extension_check', handleExtension);
             socket.on('get_pulse_menu', socketListener.bind(sendPulseMenu));
             socket.on('save_new_chain', socketListener.bind(saveNewChain));
@@ -30,7 +30,7 @@ module.exports = new function(){
             socket.on('delete_discussion_tag', socketListener.bind(deleteTag));
             socket.on('save_image', socketListener.bind(saveTagImage));
             socket.on('get_feed', socketListener.bind(getFeed));
-
+			
             // after connection established, the extension sends a checked
             // the check is supposed to get extension-user details
             function handleExtension(data){

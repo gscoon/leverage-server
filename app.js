@@ -16,8 +16,17 @@ app = {
     siteURL2: "http://localhost:" + config.port + '/',
     mongoConnected: function(){},
     io: require('./inc/socket-handle.js'), // handle sockets,
-    api: require('./inc/auth.js')
+    api: require('./inc/auth.js'),
+	domain: {base: 'chickenpox.io'}
 }
+
+var http = 'http://';
+app.domain.default = http + 'www.' + app.domain.base;
+app.domain.noSub = http + app.domain.base;
+app.domain.share = http + 'share.' + app.domain.base;
+app.domain.login = http + 'login.' + app.domain.base;
+app.domain.image = http + 'image.' + app.domain.base;
+app.domain.sub = 'www';
 
 app.db = require('./inc/db.js');
 

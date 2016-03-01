@@ -1,117 +1,29 @@
-include discussion.jade
-
-div#tag_menu
-    div#pulse_pointer
-        div#pp_icon.pp_text
-    div#tag_menu_notification_saved
-        span Tag saved!
-
-    // 1. Tag Content
-    div#tag_menu_content
-        #lev_input_container
-            img#pulse_user_image
-            input#pulse_comment_input(type="text")
-            textarea#pulse_comment_textarea
-
-    // 2. Chain menu
-    div#tag_menu_chain
-        div#chain_selection_row
-            // LOOP LOOP LOOP LOOP!!!!
-            each val, index in chainTop
-                if val.is_default == true
-                    a.chain_selection_option#default_chain #{val.name}
-                        input(type="hidden", value=val.chain_id)
-                else 
-                    a.chain_selection_option #{val.name}
-                        input(type="hidden", value=val.chain_id)
-                        
-            a#more_chain.nothing ...
-
-    div#chain_menu_expanded
-        // new expended submenu
-        div#chain_menu_expanded_select
-            div.chain_menu_expanded_header 
-                span Select a chain:
-        
-        // new chain submenu
-        div#chain_menu_expanded_new
-            div.chain_menu_expanded_header 
-                span Create a new chain:
-            div#chain_menu_expanded_new_form
-                div.chain_menu_expanded_new_form_row
-                    input#chain_menu_expanded_new_name(type="text", placeholder="Name your chain")
-                div.chain_menu_expanded_new_form_row
-                    label
-                        input#chain_menu_expanded_new_check(type='checkbox', checked=false)
-                        span Sub-chain
-                div.chain_menu_expanded_button_row
-                    a.chain_menu_expanded_button#chain_menu_save_new_button Add Chain
-                    a.chain_menu_expanded_text_button#chain_menu_cancel_new_button Cancel
-                    
-        // chain selection submenu
-        div#chain_menu_expanded_list
-            div#chain_menu_expanded_list_inner
-                // LOOP LOOP LOOP LOOP LOOP LOOP!!!!
-                each val, index in chainList
-                    div.chain_menu_expanded_list_row
-                        a.chain_menu_expanded_list_option 
-                            span.chain_menu_expanded_text #{val.name}
-                            span.chain_menu_expanded_count #{val.ccount}
-                            input(type="hidden", value=val.chain_id)
-                        if val.is_default == false
-                            a.chain_menu_expanded_list_delete(id="chain_delete_"+val.chain_id) Delete
-                                input(type="hidden", value=val.chain_id)
-            div.chain_menu_expanded_button_row#chain_menu_expanded_button_row_new
-                a#chain_menu_expanded_new_button.chain_menu_expanded_button New Chain
-                    
-    // 2. Who
-    div#tag_menu_who
-        //div.tag_specify_row_label Who can see your tag?
-        div.tag_specify_row
-            div.custom_radio
-                a.custom_radio_option.custom_radio_option_active Specify
-                a.custom_radio_option Anyone with a link
-        div.tag_specify_row
-            // div.tag_specify_row_label People and Groups
-            input#people_search_input
-            //- div.tag_specify_row_label Recent
-            //- div#tag_recent_container    
-        // buttons
-        div.button_row
-            //a#tag_back_button.button_grey() Back
-                span.back_arrow.button_arrow
-            a#tag_save_preview() Save People
-                span.plus_icon
-            a.button_grey Keep it Private
-                span.lock_icon
-    
-    // 3. Tag Preview
-    div#tag_menu_preview
-        div.tag_menu_title Preview Content
-        div#tag_menu_preview_container
-            div.tag_item_top
-                img.tag_item_user_img
-                div.tag_item_user_name
-                div.tag_item_details
-                    span.tag_item_timestamp 15 minutes ago
-                    span.tag_item_comment_count 0 Comments
-                    span.tag_item_point_count 0 Points
-            div.tag_item_thoughts
-            div.tag_item_snippit
-                div.tag_item_snippit_text
-                canvas.tag_item_snippit_img
-                a.tag_item_snippit_link
-                
-        div.button_row
-            a#preview_back_button.button_grey() Back
-                span.back_arrow.button_arrow
-            a#tag_finish_button() Finish
-                span.button_check
-    
-    div#tag_menu_load_page
-        div#tm_loader
-        div#tm_loader_message
-    // close button
-    // a#x.x
-div#general_overlay
-div#pulse_preview 
+#pox--tag_menu
+	#pox--pulse_pointer
+		#pox--pp_icon.pox--pp_text
+	#pox--tag_menu_notification_saved
+		span Tag saved!
+	// 1. Tag Content
+	#pox--tag_menu_content
+		#pox--input_container
+			img#pox--pulse_user_image
+			input#pox--pulse_comment_input(type='text')
+			textarea#pox--pulse_comment_textarea
+	// 2. Save Menu
+	#pox--tag_menu_save
+		.pox--button_row
+			a#pox--save_button_blue(href='javascript:void(0)') Share
+			a(href='javascript:void(0)') Tag More
+	#pox--tag_menu_load_page
+		#pox--tm_loader
+		#pox--tm_loader_message
+	#pox--tag_menu_controls
+		a#pox--tag_menu_controls_another + Another Tag
+		a#pox--tag_menu_controls_hide Cancel
+		
+#pox--general_overlay
+#pox--pulse_preview
+style
+	include ../public/css/menu.css
+script
+	include ../public/js/menu.js
