@@ -1,11 +1,13 @@
 script.
-	var appID = !{fbAppID};
+	var fbAppID = !{fbAppID};
 	window.fbAsyncInit = function() {
 		FB.init({
-			appId      : appID,
+			appId      : fbAppID,
 			xfbml      : true,
 			version    : 'v2.5'
 		});
+		if(window.fbStart)
+			window.fbStart();
 	};
 
 	(function(d, s, id){

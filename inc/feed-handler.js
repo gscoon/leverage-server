@@ -1,35 +1,49 @@
-var async = require('async');
-var jade = require('jade');
 var path = require('path');
 var fs = require('fs');
 var mime = require("mime");
 var util = require("util");
 
-module.exports = function(ea){
-    return new feedClass(ea);
-}
+module.exports = new feedClass();
 
-function feedClass(expressApp){
-    this.displayFeed = function(req, res, next){
-        app.db.getUserTags({uid: 1, limit: 15}, function(err, tags){
-            // format the url
+function feedClass(){
+	
+    this.displayFeed = function(req, res){
+		if(!req.poxUser.isLoggedIn)
+			return res.send('Not logged in.');
+		
+		var user = req.poxUser;
+        app.db.getUserTags({uid: req.poxUser.id, limit: 15}, function(err, rows){
+            // used to format the url ie. just show the domain part
             var r = /:\/\/(.[^/]+)/;
-            tags.forEach(function(tag, i){
-                var fURL = tag.url.match(r)[1];
+            rows.forEach(function(row, i){
+				// used to format the url ie. just show the domain part
+                var fURL = row.url.match(r)[1];
                 if(fURL.indexOf('www.')== 0) fURL = fURL.substr(4);
-                tag.formattedURL = fURL;
+                row.formattedURL = fURL;
+				
+				// get spot details into object
+				row.spot = JSON.parse(row.spot_json);
+				row.shareURL = urljoin(app.domain.share, row.spot.id);
+				
+				// user image handling
+				if(row.user_images){
+					row.user_images = JSON.parse(row.user_images);
+					row.smallUserImage = app.user.getImage(row.user_images.small.fileName);
+				}
+					
+				for(t in row.spot.images)
+					row.spot.images[t].src = returnImageURL(t, row.spot_id, row.spot.images[t].ext)
             })
-            res.render('feed', {tags: tags, title: 'Dre Day'});
+            res.render('feed', {rows: rows, title: 'My Feed - ' + user.name});
         });
     }
-
-    this.handleFileImages = function(req, res, next){
-        var filePath = path.resolve(__dirname, '../files', req.params.fileType, req.params.fileName);
-        fs.exists(filePath, function(exists) {
-            if(exists)
-                res.sendFile(filePath);
-            else
-                res.send('Page not found, playa', 404);
-        });
-    }
+	
+	function returnImageURL(type, id, ext){
+		return app.domain.image + '/{0}/{1}.{2}'.format(type, id, ext);
+	}
+	
+	this.test = function(req, res){
+		res.send(req.sessionID);
+	}
+	
 }

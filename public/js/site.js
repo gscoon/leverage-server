@@ -1,37 +1,188 @@
-$(start);
+$(siteStart);
 
 var pox = {};
-
+var webshotObj = {};
 
 var server = {
 	images: 'http://image.chickenpox.io/',
 	socket: 'http://chickenpox.io/'
 }
 
-var $selectionMenu;
-var $spotHolder;
-var $io;
+// called when facebook api is loaded
+function fbStart() {	
+	FB.getLoginStatus(function(response) {
+		console.log('FB set', response);
+		pox.user = {fb: response}
+		setPoxUser();
+	});
+}
 
-function start(){
-	$selectionMenu = $("#pox_selection_menu");
-	$spotHolder = $('#spot_holder');
-	$io = $('#image_overlay');
-	setElements();
+// called when page is fully loaded
+function siteStart(){
+	window.$selectionMenu = $("#pox_selection_menu");
+	window.$spotHolder = $('#spot_holder');
+	window.$io = $('#image_overlay');
+
+	pox.domain = poxDomain;
+	
+	// set input box
+	setSiteElements();
+	
+	// hash handler
 	handleHashChange();
 	$(window).on('hashchange', handleHashChange);
 	startSocket();
-	console.log(poxUser);
+}
+
+function setPoxUser(){
+	$.extend(pox.user, poxUser);
+	var loggedInServer = (typeof poxUser == 'object' && poxUser.isLoggedIn);
+	$('.login_button').unbind().on('click', handleLogin);
+
+	//console.log('setPoxUser', poxUser);
+	if(pox.user.fb.status == 'connected' && !loggedInServer)
+		sendServerLogin(function(){});
+	else if(!loggedInServer)
+		$('#main_login_button').show();
+	else 
+		showUserSection();
+
 	
-	setTimeout(function(){
-		FB.getLoginStatus(function(response) {
-			console.log(response);
-		});
-	}, 1000);
+
+}
+
+//log out!
+function poxLogOut(){
+	FB.logout(function(response) {
+		// user is now logged out
+		console.log('logout', response);
+		
+	})
+	window.location.href = "http://login.chickenpox.io/logout";
+}
+
+function showUserSection(){
+	$('#main_login_button').hide();
+	$('#user_section').show();
+	$('#user_name').html(pox.user.name);
+
+	var imgURL = pox.user.imageLocation + pox.user.images.small.fileName;
+	var imgLoadCount = 0;
+
+	setUserImage();
+	
+	function setUserImage(){
+		var img = new Image();
+		// successful load
+		img.onload = function(){
+			$('#user_image').css('background-image', 'url(' + imgURL + ')').hide().fadeIn(300)
+		}
+
+		// wait a second, but no more than 5
+		img.onerror = function(){
+			imgLoadCount++;
+			if(imgLoadCount == 5) return;
+			setTimeout(setUserImage,1000);
+		}
+
+		img.src = imgURL;
+	}
+}
+
+function handleLogin(){
+	FB.login(function(response){
+		console.log(response);
+		// Logged into your app and Facebook.
+		if (response.status === 'connected') {
+			pox.user.fb = response;
+			sendServerLogin();
+			if(webshotObj.pending){
+				document.location.hash = 'webshot/' + webshotObj.pending.id;
+				$('#force_login_menu, #general_overlay').hide();
+				webshotObj.pending = null;
+			}
+			
+
+		} else if (response.status === 'not_authorized') {
+		// The person is logged into Facebook, but not your app.
+		} else {
+		// The person is not logged into Facebook, so we're not sure if
+		// they are logged into this app or not.
+		}
+	});
+}
+
+function sendServerLogin(){
+	//window.location.href = "http://login.chickenpox.io/facebook?";
+	//return;
+	$.ajax({
+		url: '/fbDetails',
+		type: 'post',
+		data: {token: pox.user.fb.authResponse.accessToken, id: pox.user.fb.authResponse.userID},
+		success: function(results){
+			console.log(results);
+			$.extend(pox.user, results.user);
+			showUserSection();
+		}
+	});
 }
 
 
+function setSiteElements(){
+	$('#url-input').on('keypress', function(e){
+		if(e.keyCode != 13) return;
 
-var webshotObj = {};
+		if(!pox.user.isLoggedIn)
+			$('#force_login_menu, #general_overlay').show();
+		
+		var input = $(this);
+		var obj = {
+			url : $.trim(input.val()),
+			w: $(window).width(),
+			h: $(window).height()
+		}
+		
+		obj.url = addhttp(obj.url);
+		
+		if(!isURL(obj.url))
+			return log('Not a URL');
+		
+		log('Post sent');
+		$('#search_loader').show();
+		
+		input.prop('disabled', true);
+		
+		// send ajax request to screenshot page
+		var postURL = 'http://www.chickenpox.io/share-process?which=web-shot';
+		$.post(postURL, obj, function(r){
+			console.log(r);
+			$('#search_loader').hide();
+			input.prop('disabled', false);
+			
+			if(r.status){
+				webshotObj[r.id] = r;
+
+				// wait for user to be logged in...
+				if(pox.user.isLoggedIn)
+					document.location.hash = 'webshot/' + r.id;
+				else
+					webshotObj.pending = r;
+			}
+				
+		})
+	}).focus();
+	
+	// show user menu on hover
+	$('#user_section').on("mouseover", function () {
+		$('#user_menu').show();
+	});
+	
+	$('#user_section').on("mouseout", function () {
+		$('#user_menu').hide();
+	});
+	
+	$('#user_menu_logout').on('click', poxLogOut);
+}
 
 function handleHashChange(){
 	var hash = location.hash.slice(1);
@@ -54,7 +205,7 @@ function setWebshot(id){
 	}
 	
 	
-	$.get('http://chickenpox.io/webshot/' + id, function(r){
+	$.get('http://www.chickenpox.io/webshot/' + id, function(r){
 		console.log(r);
 		var src = server.images + r.path;
 		webshotObj[id] = r;
@@ -100,7 +251,7 @@ $(document).bind('mousemove', function(e){
 });
 
 function hideImageOverlay(){
-	console.log('hideImageOverlay');
+	//console.log('hideImageOverlay');
 	$('.poxspot, #general_overlay').hide();
 	$selectionMenu.hide();
 	$spotHolder.hide();
@@ -185,12 +336,12 @@ function showPoxMenu(e){
 
 // send post to server and show web preview
 pox.finishSpot = function(){
-	var postURL = 'http://chickenpox.io/share-process?which=web-preview';
+	var postURL = 'http://www.chickenpox.io/share-process?which=finish-preview';
 	var spot = {
 		thoughts: pox.pulse.thoughts,
 		placement: pox.pulse.pos,
 		pos: pox.pulse.pos,
-		id: pox.pulse.id
+		webshotID: webshotObj.active.id
 	};
 	
 	$.post(postURL, {spot: JSON.stringify(spot)}, function(r){
@@ -202,41 +353,6 @@ pox.finishSpot = function(){
 	
 pox.handlePageImages = function(callback){
 	
-}
-
-function setElements(){
-	$('#url-input').on('keypress', function(e){
-		if(e.keyCode != 13) return;
-		
-		var input = $(this);
-		var obj = {
-			url : $.trim(input.val()),
-			w: $(window).width(),
-			h: $(window).height()
-		}
-		
-		obj.url = addhttp(obj.url);
-		
-		if(!isURL(obj.url))
-			return log('Not a URL');
-		
-		log('Post sent');
-		$('#search_loader').show();
-		
-		input.prop('disabled', true);
-		var postURL = 'http://chickenpox.io/share-process?which=web-shot';
-		$.post(postURL, obj, function(r){
-			console.log(r);
-			$('#search_loader').hide();
-			input.prop('disabled', false);
-			
-			if(r.status){
-				webshotObj[r.id] = r;
-				document.location.hash = 'webshot/' + r.id;
-			}
-				
-		})
-	}).focus();
 }
 
 function isURL(s) {

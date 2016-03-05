@@ -7,73 +7,87 @@ var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 var logger = require('morgan');
 var subdomain = require('express-subdomain');
-
+var favicon = require('serve-favicon');
 
 module.exports = function(express, expressapp){
-	var auth = require('./inc/auth.js');
+	// handle image requests before sessions, and shit
+	var imageRouter = express.Router();
+	var share = require('./inc/share-handler.js');
+	var imageCatch = '/:type([a-zA-Z]{1,20})/:id([a-zA-Z0-9-]{1,25})\.:ext([a-zA-Z]{3,4})';
+	imageRouter.get(imageCatch, share.displayImage);
+	expressapp.use(subdomain('image', imageRouter)); // image subdomain
+	
+	// also favicons
+	expressapp.use(favicon(__dirname + '/public/images/favicons/spot-32.png'));
+	
 	// handle facebook strategy
 	passport.use(new FacebookStrategy({
 		clientID: config.facebook.appID,
 		clientSecret: config.facebook.secret,
-		callbackURL: app.domain.default + '/callback'
-	}, auth.handleToken));
+		callbackURL: app.domain.login + '/callback'
+	}, app.user.handleToken));
 	
-	
+	var secret = 'pox-cookie';
     expressapp.set('port', app.port);
     expressapp.set('view engine', 'jade');
+	expressapp.use(express.static('public'));
     expressapp.use(logger('dev'));
-    expressapp.use(express.static('public'));
-    expressapp.use(cookieParser());
     expressapp.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
-	expressapp.use(passport.initialize());
-    expressapp.use(passport.session());   
-	
+    expressapp.use(cookieParser());	
 	expressapp.use(expressSession({
-        secret: 'pox-cookie',
+        secret: secret,
         store: new SessionStore(config.db),
-        resave: true,
+        resave: false,
         saveUninitialized: true,
         cookie: { 
 			maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-			domain: "." + app.domain.base
+			domain: '.' + app.domain.base
 		}
-    }));	
-
+    }));
 	
+	// used to determine whether this is a new session or not
+	expressapp.use(function(req, res, next){
+		// if this session is new,
+		req.isFirstRequest = !(req.session.isExisting === true);
+		req.session.isExisting = true;
+		next();
+	})
 	
-	
+	expressapp.use(passport.initialize());
+    expressapp.use(passport.session());   
 	
 	// store some aspect of the user (id) in the session table
 	// after the user logs in
-    passport.serializeUser(auth.serialize);
+    passport.serializeUser(app.user.serialize);
 	
 	// when a page is called, it finds the userid.
 	// you have to use that to get the full user
-    passport.deserializeUser(auth.deserialize);
+    passport.deserializeUser(app.user.deserialize);
 	
 	// figure out user situation
-	expressapp.use(auth.userCheck);
+	expressapp.use(app.user.userCheck);
 	
+	
+	// It's routing time
 	var mainRouter = express.Router();
 	var shareRouter = express.Router();
-	var imageRouter = express.Router();
 	var loginRouter = express.Router();
+	var feedRouter = express.Router();
 	
 	mainRouter.get('/', function(req, res){
-		res.render('home', {user: req.poxUser, fbAppID: config.facebook.appID});
+		res.render('home', {user: req.poxUser, fbAppID: config.facebook.appID, domain: app.domain});
 	})
 	
-	var share = require('./inc/share-handler.js');
+	expressapp.post('/fbDetails', app.user.pullFacebookDetails);
+	
 	shareRouter.get('/:id([0-9a-zA-Z]{1,10}$)', share.displayView);
 	
 	// authentication
-	loginRouter.get('/facebook', passport.authenticate('facebook', auth.fbAuthOpts));
-	loginRouter.get('/callback', passport.authenticate('facebook'), auth.authCallback);
+	loginRouter.get('/facebook', passport.authenticate('facebook', app.user.fbAuthOpts));
+	mainRouter.get('/login/facebook', passport.authenticate('facebook', app.user.fbAuthOpts));
+	loginRouter.get('/callback', passport.authenticate('facebook'), app.user.authCallback);
 	
-	// handle image requests
-	var imageCatch = '/:type([a-zA-Z]{1,20})/:id([a-zA-Z0-9]{1,25})\.:ext([a-zA-Z]{3,4})';
-	imageRouter.get(imageCatch, share.displayImage);
-	mainRouter.get('/images'+imageCatch, share.displayImage)
+	loginRouter.get('/logout', app.user.logout);
 	
 	// handle process requests
 	mainRouter.all('/share-process', share.processRequest);
@@ -82,31 +96,27 @@ module.exports = function(express, expressapp){
 		res.render('tag_menu');
 	});
 	
+	// feed
+	var feedHandle = require('./inc/feed-handler.js');
+    feedRouter.get('/', feedHandle.displayFeed);
+    feedRouter.get('/test', feedHandle.test);
+	
+	// handle subdomains
 	expressapp.use(subdomain('share', shareRouter)); // share subdomain
-	expressapp.use(subdomain('image', imageRouter)); // image subdomain
 	expressapp.use(subdomain('login', loginRouter)); // image subdomain
 	expressapp.use(subdomain('www', mainRouter));
+	expressapp.use(subdomain('feed', feedRouter));
 	
-	//redirect to www if no subdomain
+	// catch everything else
 	expressapp.get('*', function(req, res) {
+		//redirect to www if no subdomain
 		if(req.headers.host == app.domain.base)
-			return res.redirect('http://' + app.domain.sub + '.' + app.domain.base, 301);
-		res.statusCode = 404;
-		return res.end('bad URL');
+			return res.redirect(301, app.domain.default + req.originalUrl);
+		
+		// keeeeeeeys
+		// if session was created for this request, destroy it
+		if(req.isFirstRequest)
+			req.session.destroy(); 
+		return res.status(404).send('bad URL');
 	});
-	
-	// --------------------
-    
-
-    // expressapp.get('/disc', function(req, res, next){
-        // res.render('discussion', { title: 'Dre Day'});
-    // });
-
-    // expressapp.get('/test', function(req, res, next){
-        // res.render('test', { title: 'Dre Day'});
-    // });
-
-    // var feedHandle = require('./inc/feed-handler.js')(expressapp);
-    // expressapp.get('/feed', feedHandle.displayFeed);
-    // expressapp.get('/files/:fileType/:fileName([a-zA-Z0-9\/\.]+)', feedHandle.handleFileImages);
 }

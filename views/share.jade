@@ -2,32 +2,34 @@ doctype html
 html(lang="en")
 	head
 		title #{title} - Chicken Pox
+		script(type="text/javascript").
+			 var spot = !{JSON.stringify(spot)}
 		script(type='text/javascript', src='/js/jquery.js')
 		script(type='text/javascript', src='/js/share.js')
 		script(type='text/javascript', src='/js/util.js')
 		script(type='text/javascript', src='/js/moment.min.js')
 		script(type='text/javascript', src='/js/jPulse.js')
-		script(type="text/javascript").
-			 var spot = !{JSON.stringify(spot)}
 		link(rel='stylesheet', type='text/css', href='/css/share.css')
-		link(rel="icon",href="/images/favicons/favicon-32x32.png")
+		link(rel="icon",href="/images/favicons/spot-32.png")
 		meta(property="og:image", content='' + fbImage)
 	body
-		
 		include fb-comment.html
 		div#outer
 			div#header
 				div#logo
 					a(href="http://chickenpox.io")
 						img(src="/images/logo.png")
-			div#original_post
-				div#op_poster
-				div#op_text
-				div#op_timestamp
-				img#op_poster_img
-			div#post_url
-				img#post_favicon
-				a(target="_blank")
-			div#preview_container
+			div#share_content
+				div#original_post
+					div#op_poster !{spot.user.name}
+					div#op_text !{spot.thoughts}
+					div#op_timestamp(data-timestamp=spot.timestamp)
+					div#op_poster_img(style="background-image:url(" + userImage + ")")
+				div#post_url
+					img#post_favicon(src=spot.images.favicon.src)
+					a(target="_blank",href=spot.url) !{spot.url}
+				div#preview_container
+					img(id=spot.id, src=spot.images.target.src)
+				
 		div#comment_container
 			div.fb-comments(data-numposts="5", data-href=href, width="100%")

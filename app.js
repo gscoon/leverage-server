@@ -3,35 +3,38 @@ var expressapp = express();
 var server = require('http').createServer(expressapp);
 var io = require('socket.io')(server);
 var path = require('path');
-require('./inc/global');
 
-config = require('./config/config.json');
+
+require('./inc/global');
+global.config = require('./config/config.json');
+global.async = require('async');
+global.extend = require('extend');
+global.urljoin = require('url-join');
 
 app = {
     base: __dirname,
-    async: require('async'),
-    moment: require('moment'),
     port: config.port,
-    siteURL: "http://127.0.0.1:" + config.port + '/',
-    siteURL2: "http://localhost:" + config.port + '/',
-    mongoConnected: function(){},
-    io: require('./inc/socket-handle.js'), // handle sockets,
-    api: require('./inc/auth.js'),
-	domain: {base: 'chickenpox.io'}
+	io: require('./inc/socket-handler.js'), // handle sockets,
+    user: require('./inc/user.js'), // handle users,
+	domain: {
+		http: 'http://',
+		base: 'chickenpox.io',
+		sub: 'www'
+	}
 }
 
-var http = 'http://';
-app.domain.default = http + 'www.' + app.domain.base;
-app.domain.noSub = http + app.domain.base;
-app.domain.share = http + 'share.' + app.domain.base;
-app.domain.login = http + 'login.' + app.domain.base;
-app.domain.image = http + 'image.' + app.domain.base;
-app.domain.sub = 'www';
+var d = app.domain;
+d.default = d.http + d.sub + '.' + d.base;
+d.noSub = d.http + d.base;
+d.share = d.http + 'share.' + d.base;
+d.login = d.http + 'login.' + d.base;
+d.image = d.images = d.http + 'image.' + d.base;
+d.userImage = d.images + '/user/';
+d.feed = d.http + 'feed.' + d.base;
 
 app.db = require('./inc/db.js');
 
 require('./router')(express, expressapp);
-
 server.listen(app.port, function(){
     app.io.start(io);
     console.log('Started listening on port: ' + app.port);

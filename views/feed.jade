@@ -1,3 +1,42 @@
-extends layout
-block vars
-  - var pageTitle = 'ChickenFeed'
+doctype html
+html(lang="en")
+	block vars
+	head
+		title #{title} - ChickenPox
+		script(type='text/javascript', src='/js/jquery.js')
+		script(type='text/javascript', src='/js/feed.js')
+		script(type='text/javascript', src='/js/util.js')
+		link(rel='stylesheet', type='text/css', href='/css/style.css')
+		link(rel='stylesheet', type='text/css', href='/css/feed.css')
+		script.
+			var feedRows = !{JSON.stringify(rows).replace(/<\//g, "<\\/")}
+	body
+		div#feed_outer
+			div#header
+				div#logo
+					a(href="http://www.chickenpox.io")
+						img(src="/images/logo.png")
+			div#feed_content
+				each row, index in rows
+					div.feed_row(id="feed_row_#{row.spot_id}")
+						div.feed_row_top
+							div.feed_op.feed_comment_row
+								div.feed_comment_user_img(style="background-image:url('#{row.smallUserImage}')")
+								div.feed_comment
+									span.feed_comment_user #{row.user_name}:
+									span.feed_comment_thoughts #{row.spot.thoughts}
+								div.feed_comment_ts(data-pulse-ts=row.timestamp)
+						div.feed_row_bottom
+							a.feed_row_title(href=row.url, target='_blank') #{row.spot.pageTitle}
+								img.feed_img_favicon(src=row.spot.images.favicon.src)
+							div.feed_row_img
+								if row.spot.images.fb
+									img.feed_img_target(src=row.spot.images.fb.src)
+								else
+									img.feed_img_target(src=row.spot.images.target.src)
+							div.feed_row_meta
+								a.feed_row_url(href="#{row.url}", target='_blank') #{row.formattedURL}
+								span Posted:  
+								span.feed_row_ts(data-feed-ts= "#{row.timestamp}")
+						div.share_options
+							a.share_url(href=row.shareURL, target="_blank") Join Discussion

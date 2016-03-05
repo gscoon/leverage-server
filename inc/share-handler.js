@@ -6,6 +6,8 @@ var Canvas = require('canvas');
 var fabric = require('fabric').fabric; // built on top of canvas
 var Horseman = require('node-horseman'); // headless browser screenshots
 var request = require('request'); 
+var moment = require('moment'); 
+var async = require('async'); 
 
 module.exports = new shareClass();
 
@@ -17,41 +19,6 @@ function shareClass(){
 	var allowedImages = ['screenshot', 'target', 'generic', 'meme', 'favicon', 'logo', 'fb', 'webshot'];
 	var imageExtension = ['png', 'jpg', 'gif', 'jpeg'];
 	
-	// handle share view request
-	this.displayView = function(req, res){
-		// database call by ID
-		db.getSpot(req.params.id, function(err,results){
-			// if there is not a database match
-			if(results.length != 1)
-				return res.status(404).send({status: false, m: "Not found"});
-			
-			var row = results[0];
-			var spot = JSON.parse(row.spot_json);
-			spot.timestamp = row.timestamp;
-			spot.uid = row.user_id;
-			
-			// get the images that were saved...
-			for(t in spot.images)
-				spot.images[t].src = returnImageURL(t, spot.id, spot.images[t].ext)
-			
-			// passed to jade view
-			console.log('page title', spot.pageTitle);
-			var renderObj = {
-				href: 'http://share.chickenpox.io/' + req.params.id,
-				title: spot.pageTitle,
-				spot: spot,
-				fbImage: 'http://image.chickenpox.io/fb/' + req.params.id + '.png'
-			}
-			res.render('share', renderObj);
-		})
-	}
-	
-	function returnImageURL(type, id, ext){
-		var u = 'http://share.chickenpox.io/images/{0}/{1}.{2}'.format(type, id, ext);
-		console.log(u);
-		return u;
-	}
-		
 	this.processRequest = function (req, res, next){
 
         if(typeof req.query.which === 'undefined') return res.end('Bad query');
@@ -62,7 +29,7 @@ function shareClass(){
 			case 'extension-preview':
                 handleNewExtensionPreview(httpObj);
                 break;
-			case 'web-preview':
+			case 'finish-preview':
                 finishWebPreview(httpObj);
                 break;
 			case 'web-shot':
@@ -70,6 +37,50 @@ function shareClass(){
                 break;	
         }
     }
+	
+	// handle share view request
+	this.displayView = function(req, res){
+		// database call by ID
+		db.getSpot(req.params.id, function(err,results){
+			// if there is not a database match
+			if(results.length != 1)
+				return res.status(404).send({status: false, m: "Not found"});
+			
+			var row = results[0];
+			var spot = JSON.parse(row.spot_json);
+			
+			// set spot user
+			if(row.user_details != '' && row.user_details != null){
+				spot.user = JSON.parse(row.user_details);
+				spot.user.name = row.user_name;
+			}
+				
+			
+			spot.timestamp = row.timestamp;
+			spot.uid = row.user_id;
+			
+			// get the images that were saved...
+			for(t in spot.images)
+				spot.images[t].src = returnImageURL(t, spot.id, spot.images[t].ext)
+			
+			// passed to jade view
+			var renderObj = {
+				href: urljoin(app.domain.share, req.params.id),
+				title: spot.pageTitle,
+				spot: spot,
+				fbImage: urljoin(app.domain.images, req.params.id + '.png'),
+				userImage: returnImageURL('user', spot.uid + '-large', 'jpg')
+			}
+			res.render('share', renderObj);
+		})
+	}
+	
+	function returnImageURL(type, id, ext){
+		console.log(app.domain.images);
+		return app.domain.images + '/{0}/{1}.{2}'.format(type, id, ext);
+	}
+		
+	
 	
 	function handleNewWebShot(h){
 		if(!('url' in h.req.body))
@@ -161,12 +172,16 @@ function shareClass(){
 		if(!('spot' in h.req.body))
 			return h.res.send({status: false, m: 'missing var'});
 		
+		var user = h.req.poxUser;
+		if(!user.isLoggedIn)
+			return h.res.send({status: false, m: 'not logged in'});
+		
 		var spot = JSON.parse(h.req.body.spot);
 		spot.isWebPreview = true; // used to distinguish calcs later
 		
-		db.getWebshot(spot.id, function(err, results){
+		db.getWebshot(spot.webshotID, function(err, results){
 			if(err || results.length == 0)
-				return h.res.send({status: false, m: 'db error'});
+				return h.res.send({status: false, m: 'db error', d: err});
 			
 			
 			var row = results[0];
@@ -187,7 +202,8 @@ function shareClass(){
 				.userAgent(h.req.headers['user-agent'])
 				.viewport(shotDetails.width, 2000)
 				.on('consoleMessage', function(msg, lineNumber, sourceId){
-					console.log(lineNumber, msg);
+					// show consoles...
+					//console.log(lineNumber, msg);
 				})
 				.open(shotDetails.url)
 				.scrollTo(p.window.scrollTop + p.shift.diff, p.window.scrollLeft)
@@ -218,7 +234,9 @@ function shareClass(){
 						spot.images[t] = {ext:ext, url: url};
 					}
 					
-					var saveObj = {id: spot.id, spot: spot,uid: 1} // gerren fix this
+					// generate random ID
+					spot.id = returnRandID(10);
+					var saveObj = {id: spot.id, spot: spot, uid: user.id};
 						
 					// save to database, then save images
 					app.db.saveSpot(saveObj, function(err, results){
@@ -234,7 +252,7 @@ function shareClass(){
 						fs.readFile(shotPath, function(err, shotBuffer){
 							// save target image and facebook image
 							setTargetImage(spot, shotBuffer, function(){
-								h.res.send({status: true, id: spot.id, poxURL: 'http://share.chickenpox.io/' + spot.id});
+								h.res.send({status: true, id: spot.id, poxURL: urljoin(app.domain.share, spot.id)});
 							});
 						});
 					});
@@ -287,7 +305,7 @@ function shareClass(){
 			var resObj = {
 				status: true,
 				id: spot.id,
-				poxURL: 'http://share.chickenpox.io/' + spot.id
+				poxURL: urljoin(app.domain.share, spot.id)
 			}
 			h.res.send(resObj);
 		});
@@ -431,6 +449,10 @@ function shareClass(){
 		// 6. save to file system
 		var fbDataURL = canvas.toDataURL();
 		storeImage({type: 'fb', ext: 'png', id: spot.id, str: fbDataURL});
+		
+		// update that shit
+		db.updateSpotDetails(spot.id, spot, function(){});
+		
 		if(typeof done == 'function')
 			done();
 	}
@@ -481,7 +503,7 @@ function shareClass(){
 	
 	this.displayImage = function(req, res){
 		var p = req.params;
-		var filePath = path.resolve(__dirname,'../files/{0}/{1}.{2}'.format(p.type, p.id, p.ext));
+		var filePath = path.resolve(__dirname,'../files', p.type, p.id+'.'+p.ext);
 		res.sendFile(filePath)
 	}
 	
@@ -496,7 +518,7 @@ function shareClass(){
 		if('str' in imgObj){
 			var imageBuffer = decodeBase64Image(imgObj.str);
 			fs.writeFile(savePath, imageBuffer.data, function(err) {
-				console.log('image_saved', imgObj.type, err, app.moment().format("YYYY-MM-DD HH:mm:ss"));
+				//console.log('image_saved', imgObj.type, err, moment().format("YYYY-MM-DD HH:mm:ss"));
 			});
 		}
 		else if('url' in imgObj){// if url is provided

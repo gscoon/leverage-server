@@ -5,7 +5,7 @@ body, html
 {
     margin:0;
     padding:0;
-	background-color:#efefef;
+	background-color:#fff;
 	box-sizing: border-box;
 	font-family: 'Open Sans';
 }
@@ -15,16 +15,16 @@ body, html
 	box-sizing: inherit;
 }
 
-#header
-{
-	padding:10px 0;
-	border:#ccc solid;
-	border-width:0 0 1px;
-}
-
 body
 {
 	padding:0 420px 0 10px;
+}
+
+#header
+{
+	padding:10px 0;
+	border:#efefef solid;
+	border-width:0 0 1px;
 }
 
 #outer
@@ -33,6 +33,11 @@ body
 	max-width:800px;
 	margin:0 auto;
 	position:relative;
+}
+
+#share_content
+{
+	padding:0 0 0 10px;
 }
 
 #preview_container
@@ -53,8 +58,8 @@ body
 
 #original_post
 {
-	margin:15px 0 10px;
-	padding:0 10px 0 65px;
+	margin:15px 0 20px;
+	padding:0 10px 0 50px;
 	position:relative;
 }
 
@@ -83,10 +88,13 @@ body
 #op_poster_img
 {
 	position:absolute;
-	width:50px;
+	width:40px;
+	height:55px;
 	left:0;
 	top:0;
 	border-radius:4px;
+	background-size: cover; 
+	background-position: 50%;
 }
 
 #post_url
@@ -95,15 +103,17 @@ body
 	overflow: hidden;              /* "overflow" value must be different from  visible"*/ 
     -o-text-overflow: ellipsis;    /* Opera < 11*/
     text-overflow:    ellipsis; 
-	height:20px;
-	margin:0 0 10px;
-	padding:0 0 0 25px;
+	margin:0 0 0;
+	padding:0 0 5px 22px;
 	vertical-align:top;
 }
 
 #post_url a
 {
 	vertical-align:top;
+	font-size:13px;
+	color:#777;
+	text-decoration:none;
 }
 
 #post_url a:hover
@@ -124,13 +134,6 @@ body
 {
 	position:absolute;
 	
-}
-
-#post_url a
-{
-	color:#999;
-	font-size:11px;
-	text-decoration:none;
 }
 
 #comment_container

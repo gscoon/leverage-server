@@ -38,7 +38,7 @@ function addFunctions(cp){
 	
 	cp.keys = {ctrl: 17, v: 86, c:67, f: 70, esc: 27, enter: 13};
 	
-	console.log('cp', cp);
+	//console.log('cp', cp);
 	
     cp.showTagMenu = function(webshotCallback, priorStateCallback){
         console.log('showTagMenu')
@@ -58,8 +58,8 @@ function addFunctions(cp){
         pulse.pointer.find('#pp_icon').attr('class', 'pox--pp_text');
 
         // set image
-        if(cp.user && cp.user.image)
-            $('#pox--pulse_user_image').attr('src', cp.user.image.small);
+        if(cp.user && cp.user.smallImage)
+            $('#pox--pulse_user_image').css('background-image', 'url(' + pox.domain.userImage + pox.user.images.small.fileName + ')');
 
         // need this to get accurate width below
         $('#pox--tag_menu_content').show();

@@ -6,7 +6,8 @@ html(lang="en")
 		script(type='text/javascript', src='/js/site.js')
 		script(type='text/javascript', src='/js/util.js')
 		script.
-			var poxUser = !{JSON.stringify(user).replace(/<\//g, "<\\/")}
+			var poxUser = !{JSON.stringify(user).replace(/<\//g, "<\\/")};
+			var poxDomain = !{JSON.stringify(domain).replace(/<\//g, "<\\/")};
 		script(type='text/javascript', src='/js/jPulse.js')
 		
 		link(rel="stylesheet", href="/css/style.css")
@@ -19,14 +20,26 @@ html(lang="en")
 			div#logo
 				img(src="/images/logo.png")
 			div#tag_line
-				h1 Discuss what matters <br>with who matters most
+				h1 Discuss what matters most<br>with who matters most
 			div#search
 				div#search_loader
 				input#url-input(type="text", placeholder="Copy and paste a URL")
+			div#user_section
+				div#user_image
+					img
+				a#user_name(href=domain.feed)
+				div#user_menu
+					a#user_menu_feed(href=domain.feed) My Feed
+					a#user_menu_logout Log Out
+			a#main_login_button.login_button
 		div#spot_holder
 		div#pox_selection_menu
 			div#selection_description Select a point on the page to tag
 			img#image_overlay
 			div#selection_overlay
 		div#general_overlay
+		div#force_login_menu
+			span Please log in to continue
+			a#force_login_button.login_button
+
 		include tag_menu.jade
