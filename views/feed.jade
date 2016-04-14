@@ -28,7 +28,8 @@ html(lang="en")
 								div.feed_comment_ts(data-pulse-ts=row.timestamp)
 						div.feed_row_bottom
 							a.feed_row_title(href=row.url, target='_blank') #{row.spot.pageTitle}
-								img.feed_img_favicon(src=row.spot.images.favicon.src)
+								if row.spot.images.favicon
+									img.feed_img_favicon(src=row.spot.images.favicon.src)
 							div.feed_row_img
 								if row.spot.images.fb
 									img.feed_img_target(src=row.spot.images.fb.src)

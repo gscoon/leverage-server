@@ -58,7 +58,8 @@ body
 
 #original_post
 {
-	margin:15px 0 20px;
+	margin:15px 0 10px;
+	min-height:55px;
 	padding:0 10px 0 50px;
 	position:relative;
 }
@@ -100,12 +101,13 @@ body
 #post_url
 {
 	position:relative;
-	overflow: hidden;              /* "overflow" value must be different from  visible"*/ 
+	overflow: hidden;   /* "overflow" value must be different from  visible"*/ 
     -o-text-overflow: ellipsis;    /* Opera < 11*/
     text-overflow:    ellipsis; 
-	margin:0 0 0;
+	margin:0 0 10px;
 	padding:0 0 5px 22px;
 	vertical-align:top;
+	height:18px;
 }
 
 #post_url a
@@ -136,6 +138,11 @@ body
 	
 }
 
+.fb-comments
+{
+	padding:0 0 0 5px;
+}
+
 #comment_container
 {
 	position:fixed;
@@ -144,10 +151,67 @@ body
 	width:400px;
 	height:100%;
 	background-color:#fff;
-	box-shadow:0px -3px 5px #999;
-	padding:0 0 0 5px;
-	z-index:300;
+	box-shadow:0px -3px 10px #000;
+	z-index:99999999;
 }
+
+#comment_container_top
+{
+	position:relative;
+	padding:10px 5px;
+	margin:0 0 10px;
+	text-align: center;
+	border:#ccc solid;
+	border-width:0 0 1px;
+}
+
+#comment_container_visibility
+{
+	position:absolute;
+	left:-50px;
+	top:10px;
+	border-radius: 5px 0 0 5px;
+	background-color: rgba(0,0,0,.8);
+	color:#fff;
+	display:block;
+	float: left;
+	padding:4px 0;
+	text-align: center;
+	font-size:13px;
+	cursor:pointer;
+	width:50px;
+	box-shadow:-2px 0 7px #999;
+}
+
+
+#copy_link_outer
+{
+	position: relative;
+	margin:0 0 15px;
+	cursor: pointer;
+}
+
+#copy_link_span
+{
+	position:absolute;
+	left:5px;
+	top:4px;
+	display: block;
+	font-size:11px;
+	color:#fff;
+	background-color: #A82836;
+	padding:2px 5px;
+	border-radius: 3px;
+}
+
+input#copy_link
+{
+	width: 100%;
+    border: #ccc solid 1px;
+    color: #999;
+    padding: 5px 3px 5px 45px;
+    cursor: pointer;
+
 
 div.pulse_set_bar, div.pulse_set_circle
 {
@@ -171,4 +235,6 @@ div.pulse_set_bar, div.pulse_set_circle
     width:30px;
     border-radius: 50%;
     opacity:.4;
+}
+
 }

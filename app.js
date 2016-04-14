@@ -4,9 +4,10 @@ var server = require('http').createServer(expressapp);
 var io = require('socket.io')(server);
 var path = require('path');
 
+log = require(path.join(__dirname, 'inc/log.js'));
 
-require('./inc/global');
-global.config = require('./config/config.json');
+require(path.join(__dirname, 'inc/global'));
+global.config = require(path.join(__dirname, 'config/config.json'));
 global.async = require('async');
 global.extend = require('extend');
 global.urljoin = require('url-join');
@@ -14,8 +15,8 @@ global.urljoin = require('url-join');
 app = {
     base: __dirname,
     port: config.port,
-	io: require('./inc/socket-handler.js'), // handle sockets,
-    user: require('./inc/user.js'), // handle users,
+	io: require(path.join(__dirname, 'inc/socket-handler.js')), // handle sockets,
+    user: require(path.join(__dirname, 'inc/user.js')), // handle users,
 	domain: {
 		http: 'http://',
 		base: 'chickenpox.io',
@@ -37,5 +38,5 @@ app.db = require('./inc/db.js');
 require('./router')(express, expressapp);
 server.listen(app.port, function(){
     app.io.start(io);
-    console.log('Started listening on port: ' + app.port);
+    log('Started listening on port: ' + app.port);
 });

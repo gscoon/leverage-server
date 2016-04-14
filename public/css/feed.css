@@ -1,8 +1,11 @@
 #header
 {
-	padding:10px 0;
-	border:#efefef solid;
-	border-width:0 0 1px;
+	padding:25px 0;
+}
+
+#logo
+{
+    text-align: center;
 }
 
 #feed_outer

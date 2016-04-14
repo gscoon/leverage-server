@@ -1,6 +1,6 @@
 $(siteStart);
 
-var pox = {};
+var pox = cp = {};
 var webshotObj = {};
 
 var server = {
@@ -46,8 +46,6 @@ function setPoxUser(){
 		$('#main_login_button').show();
 	else 
 		showUserSection();
-
-	
 
 }
 

@@ -4,6 +4,7 @@
     "body-parser": "^1.14.2",
     "canvas": "^1.3.10",
     "cheerio": "^0.20.0",
+    "colors": "^1.1.2",
     "cookie-parser": "^1.4.1",
     "express": "^4.13.4",
     "express-mysql-session": "^0.4.4",

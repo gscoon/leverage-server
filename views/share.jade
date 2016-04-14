@@ -1,7 +1,7 @@
 doctype html
 html(lang="en")
 	head
-		title #{title} - Chicken Pox
+		title #{title} - ChickenPox
 		script(type="text/javascript").
 			 var spot = !{JSON.stringify(spot)}
 		script(type='text/javascript', src='/js/jquery.js')
@@ -12,6 +12,7 @@ html(lang="en")
 		link(rel='stylesheet', type='text/css', href='/css/share.css')
 		link(rel="icon",href="/images/favicons/spot-32.png")
 		meta(property="og:image", content='' + fbImage)
+		meta(property="og:type", content="article")
 	body
 		include fb-comment.html
 		div#outer
@@ -26,10 +27,18 @@ html(lang="en")
 					div#op_timestamp(data-timestamp=spot.timestamp)
 					div#op_poster_img(style="background-image:url(" + userImage + ")")
 				div#post_url
-					img#post_favicon(src=spot.images.favicon.src)
+					if spot.images.favicon
+						img#post_favicon(src=spot.images.favicon.src)
 					a(target="_blank",href=spot.url) !{spot.url}
 				div#preview_container
 					img(id=spot.id, src=spot.images.target.src)
 				
 		div#comment_container
+			a#comment_container_visibility(data-direction="hide") Hide
+			div#comment_container_top
+				div#copy_link_outer
+					input#copy_link(value=fullURL)
+					span#copy_link_span copy
+				img(src="/images/discuss.gif")
+				
 			div.fb-comments(data-numposts="5", data-href=href, width="100%")

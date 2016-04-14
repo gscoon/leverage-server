@@ -43,23 +43,30 @@ var dbClass = function(){
 	this.getWebshot = function(id, cb){
 		var q = "SELECT * FROM webshot WHERE spot_id = ?";
 		var params = [id];
-        runQuery(q, params, cb);
+		runQuery(q, params, cb);
 	}
 	
 	this.setWebshot = function(obj, cb){
 		var ts = moment().format("YYYY-MM-DD HH:mm:ss");
 		var q = "INSERT INTO webshot (spot_id, details, timestamp) VALUES (?, ?, ?)";
 		var params = [obj.id, JSON.stringify(obj), ts];
-        runQuery(q, params, cb);
+		runQuery(q, params, cb);
 	}
 
 
-    this.getUserTags = function(t, callback){
-        var limit = ('limit' in t)?t.limit:10;
-        var q = "SELECT s.*, u.user_images, u.name as user_name, u.user_images FROM spot s JOIN user u ON u.user_id = s.user_id WHERE s.user_id = ? ORDER BY s.timestamp DESC LIMIT ?";
-        var params = [t.uid, t.limit];
-        runQuery(q, params, callback);
-    }
+	this.getUserTags = function(t, callback){
+		var limit = ('limit' in t)?t.limit:10;
+		var q = "SELECT s.*, u.user_images, u.name as user_name, u.user_images FROM spot s JOIN user u ON u.user_id = s.user_id WHERE s.user_id = ? ORDER BY s.timestamp DESC LIMIT ?";
+		var params = [t.uid, t.limit];
+		runQuery(q, params, callback);
+	}
+
+	this.getPageTags = function(uid, url, callback){
+		var q = "SELECT * FROM spot WHERE user_id = ? AND url = ?";
+		var params = [uid, url];
+		runQuery(q, params, callback);
+	}
+
 
 	
 	this.addUser = function(u, callback){
@@ -75,12 +82,6 @@ var dbClass = function(){
 		var params = [uid];
 		runQuery(q, params, callback);
 	}
-
-	this.getUserByExtension = function(eid, callback){
-		var q = "SELECT e.*, u.* FROM user_extension e LEFT JOIN user u ON e.user_id = u.user_id WHERE e.extension_id = ?";
-		var params = [eid];
-		runQuery(q, params, callback);
-	}
 	
 	this.updateUserField = function(uid, field, d, callback){
 		var q = "UPDATE user SET {0} = ? WHERE user_id = ?".format(field);
@@ -90,10 +91,30 @@ var dbClass = function(){
 		runQuery(q, params, callback);
 	}
 
+	// extension stuff
+	this.getUserByExtension = function(eid, callback){
+		var q = "SELECT e.*, u.* FROM user_extension e LEFT JOIN user u ON e.user_id = u.user_id WHERE e.extension_id = ?";
+		var params = [eid];
+		runQuery(q, params, callback);
+	}
 
-    function runQuery(q, params, callback){
-        conn.query(q, params, callback);
-    }
+	this.addNewExtension = function(eid, callback){
+		var ts = moment().format("YYYY-MM-DD HH:mm:ss");
+		var q = "INSERT INTO user_extension (extension_id, create_timestamp) VALUES (?, ?)";
+		var params = [eid, ts];
+		runQuery(q, params, callback);
+	}
+
+	this.updateExtensionUser = function(eid, uid, callback){
+		var q = "UPDATE user_extension SET user_id = ? WHERE extension_id = ?";
+		var params = [uid, eid];
+		runQuery(q, params, callback);
+	}
+
+
+	function runQuery(q, params, callback){
+		conn.query(q, params, callback);
+	}
 
 
 }

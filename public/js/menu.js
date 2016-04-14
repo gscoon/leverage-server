@@ -1,15 +1,6 @@
-// SHOW TAG MENU
-
 $(function(){
-	console.log(window.pox, window.chickenPox);
-	
-	if(window.pox)
-		return addFunctions(window.pox);
-	
-	if(!window.chickenPox)
-		window.chickenPox = {};
-	
-	addFunctions(window.chickenPox);
+    var pox = window.pox || window.chickenPox || {};
+	addFunctions(pox);
 });
 
 function addFunctions(cp){
@@ -34,13 +25,13 @@ function addFunctions(cp){
 		pageTitle: $.trim(document.title.split(/[\|\-]/g)[0])
 	};
 	
-	cp.z = {pulse: 999999999, menu: 99999999999997, menuX: 99999999999999, select: 99999999999998};
+	cp.z = {pulse: 9999999, menu: 9999999, menuX: 9999999, select: 9999999};
 	
 	cp.keys = {ctrl: 17, v: 86, c:67, f: 70, esc: 27, enter: 13};
 	
 	//console.log('cp', cp);
-	
-    cp.showTagMenu = function(webshotCallback, priorStateCallback){
+	// SHOW TAG MENU
+    cp.showTagMenu = function(menuSetCallback, priorStateCallback){
         console.log('showTagMenu')
 		
 		pulse.menu = $('#pox--tag_menu');
@@ -59,7 +50,7 @@ function addFunctions(cp){
 
         // set image
         if(cp.user && cp.user.smallImage)
-            $('#pox--pulse_user_image').css('background-image', 'url(' + pox.domain.userImage + pox.user.images.small.fileName + ')');
+            $('#pox--pulse_user_image').css('background-image', 'url(' + cp.user.smallImage + ')');
 
         // need this to get accurate width below
         $('#pox--tag_menu_content').show();
@@ -85,16 +76,27 @@ function addFunctions(cp){
         $('body').animate({
             scrollTop: y - pulse.pos.window.h / 2
         }, 500, function(){
-			pulse.pos.shift.post = pulse.target[0].getBoundingClientRect().top;
+			// now that all the shifts have taken place
+            pulse.pos.shift.post = pulse.target[0].getBoundingClientRect().top;
 			pulse.pos.shift.diff = pulse.pos.shift.post - pulse.pos.shift.pre;
+   
+            pulse.pos.window.scrollTop = $(window).scrollTop();
+            pulse.pos.window.scrollLeft = $(window).scrollLeft();
 
-			if(typeof webshotCallback == 'function')
-				webshotCallback(showMessageMenu);
+            pulse.pos.view.y += pulse.pos.shift.diff;
+
+            if(typeof cp.analyzeDOM == 'function')
+                cp.analyzeDOM();
+
+			if(typeof menuSetCallback == 'function')
+				menuSetCallback(showMessageMenu);
         });
     }
 	
 	// continuation from function above
     var showMessageMenu = cp.showMessageMenu = function(){
+    
+
         hideAllMenuContainers();
 
         $('#pox--tag_menu_content').show();
@@ -142,14 +144,9 @@ function addFunctions(cp){
                 setTimeout(pulse.menu.hide, 1000)
             }, 1000);
 	}
-	
-	
-	
-	function returnExtension(filename){
-		return filename.split('.').pop();
-	}
 
-    function hideAllMenuContainers(){
+    var hideAllMenuContainers = cp.hideAllMenuContainers = function(){
+        console.log('hideAllMenuContainers');
         $('#pox--tag_menu_content, #pox--tag_menu_chain, #pox--tag_menu_preview, #pox--tag_menu_who, #pox--tag_menu_load_page, #pox--chain_menu_expanded, #pox--tag_menu_notification_saved, #pox--tm_loader_message, #pox--chain_menu_expanded_new').hide();
     }
 
@@ -193,11 +190,6 @@ function addFunctions(cp){
         }, 1000);
     }
 
-
-    function handlePageTags(response){
-        cp.setExistingTag(response.results);
-    }
-
     // undo tag
     function undoPulse(){
         var data = {
@@ -219,7 +211,11 @@ function addFunctions(cp){
         pulse.target.jPulse( "disable" );
         pulse.menu.fadeOut(200);
         pulse.isMenuActive = false;
-		if(typeof done == 'function')
+		console.log('type of way: ', typeof cp.poxTable);
+        if(typeof cp.poxTable == 'object')
+            cp.hidePoxBox();
+
+        if(typeof done == 'function')
 			done();
     }
 
@@ -252,6 +248,7 @@ function addFunctions(cp){
         retObj.rel = {x: (x - dims.ol), y:(y - dims.ot)};
         retObj.spacing = {left: dims.ol - dims.opl, top: dims.ot - dims.opt};
         retObj.opt = {left: retObj.rel.x + retObj.spacing.left, top: retObj.rel.y + retObj.spacing.top};
+
         retObj.window = {
             w: $(window).width(),
             h: $(window).height(),
@@ -260,6 +257,9 @@ function addFunctions(cp){
 			scrollTop: $(window).scrollTop(),
 			scrollLeft: $(window).scrollLeft()
         };
+
+        // for some reason, body can have an offset... margin issues
+        retObj.body = $.extend($('body').offset(), {width:$('body').width(), height: $('body').height()});
 
         retObj.view = {x: e.clientX, y: e.clientY};
 
@@ -340,7 +340,7 @@ function addFunctions(cp){
         return a;
     }
 
-    function genRandomStr(len){
+    cp.genRandomStr = function(len){
 	    var text = "";
 	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	    for( var i=0; i < len; i++ )
@@ -383,34 +383,16 @@ function addFunctions(cp){
         //console.log('checkup', r);
     }
 
-    function startCtrlTimer(){
-        ctrlKey.isPressed = true;
-        var currentID = genRandomStr(3);
-        ctrlKey.pressID = currentID;
-        setTimeout(function(){
-            if(currentID == ctrlKey.pressID){
-                resetCtrlKey();
-                console.log('times up on that key, bro');
-            }
-        }, 5000)
-    }
-
-    function resetCtrlKey(){
-        ctrlKey.isPressed = false;
-        ctrlKey.pressID = null;
-        $('a.pox--disabled').removeClass('pox--disabled');
-    }
-
     
-    this.doCSSTricks = function(ele, type){
+    cp.doCSSTricks = function(ele, type){
         if(type == 'menu')
             ele.find('*').css({'line-height': 'normal'});
         else if(type == 'circle')
             ele.css({'padding': '0px', 'margin':'0px'});
     }
 
-    this.updateTimeSince = function() {
-        var dTag = 'data-pulse-ts';
+    cp.updateTimeSince = function(dTag){
+        if(!dTag) dTag = 'data-pulse-ts';
 
 
         $('[' + dTag + ']').each(function(i, span){

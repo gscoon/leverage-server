@@ -30,6 +30,41 @@ function handlePreview(){
 	spot.pulseOptions.left += spot.pulseOptions.size*.5 - pad; // 10 for padding
 	// finally, show the pulsating circle
     pv.find('img').jPulse(spot.pulseOptions);
+
+    $('#copy_link_outer').on('click', function(){
+        $('#copy_link').select();
+        document.execCommand('copy');
+        var startColor = $('#copy_link_span').css('backgroundColor');
+        console.log('bg', startColor);
+        $('#copy_link_span')
+            .hide()
+            .fadeIn(400)
+    });
+
+
+
+    var visi = {
+    	hide: {
+    		right: -340,
+    		text: 'Hide',
+    		opp: 'show'
+    	},
+    	show: {
+    		right:0,
+    		text: 'Show',
+    		opp: 'hide'
+    	}
+    }
+
+    $('#comment_container_visibility').on('click', function(){
+    	var dir = $(this).attr('data-direction');
+    	$('#comment_container').animate({
+    		right: visi[dir].right
+    	});
+
+    	$(this).html(visi[visi[dir].opp].text);
+    	$(this).attr('data-direction', visi[dir].opp);
+    });
 }
 
 
