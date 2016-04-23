@@ -17,6 +17,16 @@ module.exports = function(express, expressapp){
 	imageRouter.get(imageCatch, share.displayImage);
 	expressapp.use(subdomain('image', imageRouter)); // image subdomain
 
+	// handle requests with no subdomain domain name
+	expressapp.use(function(req, res, next){
+		var devHosts = ['localhost', 'dev'];
+		if((devHosts.indexOf(req.hostname) == -1) && (req.subdomains.length == 0)){
+			console.log('it is ralph tho')
+			return res.redirect(301, req.protocol + '://www.' + req.hostname + req.originalUrl);
+		}
+		next();
+	});
+
 	// also favicons
 	expressapp.use(favicon(__dirname + '/public/images/favicons/spot-32.png'));
 
@@ -33,7 +43,7 @@ module.exports = function(express, expressapp){
 
 	expressapp.use(bodyParser.json());
     expressapp.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
-	
+
 	expressapp.use(express.static('public'));
     expressapp.use(logger('dev'));
 
@@ -114,6 +124,7 @@ module.exports = function(express, expressapp){
 	expressapp.use(subdomain('login', loginRouter)); // image subdomain
 	expressapp.use(subdomain('www', mainRouter));
 	expressapp.use(subdomain('feed', feedRouter));
+
 
 	// catch everything else
 	expressapp.get('*', function(req, res) {
